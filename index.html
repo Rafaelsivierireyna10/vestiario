@@ -1838,7 +1838,7 @@ function calibrarPelaTabela(L2){
       p.pot = clamp(Math.max(p.pot + ajuste, p.ovr), p.ovr, 93);
       p.ovrF = p.ovr;
       if(typeof valorDeMercado==='function') p.valor = valorDeMercado(p.ovr, p.idade);
-      if(typeof salarioDe==='function')      p.salario = salarioDe(p.ovr, p.idade);
+      if(typeof salarioDe==='function')      p.salario = Math.max(30000, Math.round(salarioDe(p.ovr, p.idade)*((c&&c.escSal)||1)/1000)*1000);
     });
   });
 }
@@ -1861,7 +1861,7 @@ function render(){
 /* ===== 02-motor ===== */
 'use strict';
 
-const K = { SHOT:0.255, CONV:0.099, HOME:1.086, EXP_S:1.32, EXP_C:1.0,
+const K = { SHOT:0.255, CONV:0.090, HOME:1.090, EXP_S:1.14, EXP_C:0.92,
             FOUL:0.132, PEN:0.018, DUR:90 };
 
 const MENT = {
@@ -2021,6 +2021,99 @@ function aplicaCartao(M, S, u, vermelho){
   }
 }
 
+
+/* ---------- Momentos do jogo: duas decisões que mudam a partida ----------
+   O técnico deixa as duas escolhas armadas (uma por situação: perdendo,
+   empatando, ganhando). Na liga online a partida roda igual em todo celular,
+   então o plano é o que vale. Na carreira, se você estiver assistindo,
+   o jogo pausa e pergunta — com o plano já selecionado. */
+const ACOES_MOMENTO = {
+  manter:   {n:'Manter o plano',       d:'Nada muda. O time segue como está.'},
+  pressao:  {n:'Subir a marcação',     d:'Pressão alta: rouba mais bola e cria mais, mas cansa e dá falta.'},
+  recuar:   {n:'Recuar as linhas',     d:'Pressão baixa e time cauteloso: sofre menos, cria menos.'},
+  curto:    {n:'Segurar a bola',       d:'Toque curto: menos finalizações, mas de melhor qualidade.'},
+  direto:   {n:'Jogo direto',          d:'Bola pra frente: muito mais chute, menos capricho.'},
+  lados:    {n:'Abrir pelos lados',    d:'Jogo pelas pontas, equilíbrio entre volume e qualidade.'},
+  ofensivo: {n:'Adiantar o time',      d:'Mentalidade ofensiva: mais ataque, mais espaço atrás.'},
+  total:    {n:'Tudo pra frente',      d:'Time todo no ataque. Ou empata, ou toma o terceiro.'},
+  segurar:  {n:'Fechar o jogo',        d:'Retranca: segura o resultado e aceita o sufoco.'},
+  atacante: {n:'Botar mais um atacante', d:'Entra o melhor atacante do banco no lugar do mais cansado da defesa.'},
+  zagueiro: {n:'Botar mais um zagueiro', d:'Entra um defensor no lugar de um homem de frente.'}
+};
+
+function momentosPadrao(){
+  return [
+    {min:30, perdendo:'pressao', empatando:'manter',  ganhando:'manter'},
+    {min:70, perdendo:'ofensivo',empatando:'atacante',ganhando:'segurar'}
+  ];
+}
+
+function situacaoDe(M,S){
+  const meu = S===M.h?M.hg:M.ag, dele = S===M.h?M.ag:M.hg;
+  return meu<dele ? 'perdendo' : meu>dele ? 'ganhando' : 'empatando';
+}
+
+function acaoDoMomento(M,S,k){
+  const ms=(S.instr&&S.instr.momentos)||momentosPadrao();
+  const m=ms[k]||momentosPadrao()[k];
+  return m[situacaoDe(M,S)]||'manter';
+}
+
+function entraDoBanco(S, posQuer){
+  const ordem = posQuer==='ATA' ? ['ATA','PON','MEI'] : ['ZAG','LAT','VOL'];
+  for(const pos of ordem){
+    const c=S.banco.filter(p=>p.pos===pos&&p.lesao<=0).sort((a,b)=>b.ovr-a.ovr||(a.id<b.id?-1:1))[0];
+    if(c) return c;
+  }
+  return null;
+}
+
+function saiDoCampo(S, defensivo){
+  const grupos = defensivo ? ['VOL','ZAG','LAT'] : ['ATA','PON','MEI'];
+  const cands=S.emCampo.filter(u=>!u.fora&&u.slot!=='GOL'&&grupos.includes(u.slot));
+  if(!cands.length) return null;
+  return cands.slice().sort((a,b)=>a.energia-b.energia||(a.p.id<b.p.id?-1:1))[0];
+}
+
+function aplicarAcaoMomento(M,S,acao){
+  const sig = S===M.h?'h':'a';
+  const sg = S.clube.sigla;
+  if(!acao||acao==='manter') return null;
+  if(acao==='pressao'){ S.tac.pressao='alta'; return `${sg} sobe a marcação e aperta no campo do adversário.`; }
+  if(acao==='recuar'){ S.tac.pressao='baixa'; S.tac.mentalidade='cauteloso'; return `${sg} recua as linhas e fecha os espaços.`; }
+  if(acao==='curto'){ S.tac.estilo='curto'; return `${sg} passa a segurar a bola e trocar passes.`; }
+  if(acao==='direto'){ S.tac.estilo='direto'; return `${sg} parte pro jogo direto, bola na frente.`; }
+  if(acao==='lados'){ S.tac.estilo='lados'; return `${sg} abre o jogo pelos lados.`; }
+  if(acao==='ofensivo'){ S.tac.mentalidade='ofensivo'; return `${sg} adianta o time no campo de ataque.`; }
+  if(acao==='total'){ S.tac.mentalidade='total'; return `${sg} joga tudo pra frente.`; }
+  if(acao==='segurar'){ S.tac.mentalidade='retranca'; return `${sg} fecha o jogo pra segurar o resultado.`; }
+  if(acao==='atacante'||acao==='zagueiro'){
+    if(S.subs>=3) return null;
+    const entra=entraDoBanco(S, acao==='atacante'?'ATA':'ZAG');
+    const sai=saiDoCampo(S, acao==='atacante');
+    if(!entra||!sai) return null;
+    const nomeSai=sai.p.nome, nomeEntra=entra.nome;
+    fazerSub(M,S,sai,entra);
+    return acao==='atacante'
+      ? `${sg} vai com mais um atacante: ${nomeEntra} no lugar de ${nomeSai}.`
+      : `${sg} reforça a defesa: ${nomeEntra} entra no lugar de ${nomeSai}.`;
+  }
+  return null;
+}
+
+function aplicaMomentos(M,S,O){
+  const ms=(S.instr&&S.instr.momentos)||momentosPadrao();
+  for(let k=0;k<2;k++){
+    const m=ms[k]||momentosPadrao()[k];
+    if(S.jaAplicou['m'+k]) continue;
+    if(M.min < (m.min||(k?70:30))) continue;
+    S.jaAplicou['m'+k]=1;
+    if(S.ao_vivo && M.liveSide){ M.pausa={tipo:'momento', side:S===M.h?'h':'a', k}; return; }
+    const txt=aplicarAcaoMomento(M,S,acaoDoMomento(M,S,k));
+    if(txt) ev(M,'sys',S===M.h?'h':'a','Banco: '+txt,'sys');
+  }
+}
+
 function aplicaInstrucoes(M, S, O){
   const i=S.instr; if(!i) return;
   const meu = S===M.h?M.hg:M.ag, dele = S===M.h?M.ag:M.hg;
@@ -2072,13 +2165,17 @@ function passoMinuto(M){
   if(!H.ao_vivo) aplicaInstrucoes(M,H,A);
   if(!A.ao_vivo) aplicaInstrucoes(M,A,H);
 
+  aplicaMomentos(M,H,A);
+  if(!M.pausa) aplicaMomentos(M,A,H);
+  if(M.pausa) { M.min--; return; }
+
   const fh=forcas(H), fa=forcas(A);
   const mH=fh.mid*K.HOME, aH=fh.atk*K.HOME, dH=fh.def*(1+(K.HOME-1)*.5);
   const pH = Math.pow(mH,1.35)/(Math.pow(mH,1.35)+Math.pow(fa.mid,1.35));
   H.posse+=pH; A.posse+=(1-pH);
 
   // desgaste
-  const drenoH=.46*fh.dre, drenoA=.46*fa.dre;
+  const drenoH=.55*fh.dre, drenoA=.55*fa.dre;
   H.emCampo.forEach(u=>{if(!u.fora)u.energia=clamp(u.energia-drenoH*(u.slot==='GOL'?.25:1)*(u.p.idade>31?1.12:1)*(.85+rnd()*.3),0,100);});
   A.emCampo.forEach(u=>{if(!u.fora)u.energia=clamp(u.energia-drenoA*(u.slot==='GOL'?.25:1)*(u.p.idade>31?1.12:1)*(.85+rnd()*.3),0,100);});
 
@@ -2106,11 +2203,16 @@ function passoMinuto(M){
     }
     // chance
     // a diferença entre os times conta, mas satura: gigante x pequeno não vira 12x0
-    const razao = clamp(atkV/defO, 0.66, 1.52);
+    const razao = clamp(atkV/defO, 0.70, 1.44);
     // goleada encaminhada: quem está ganhando tira o pé, quem perde se joga
     const dif = (S===M.h ? M.hg-M.ag : M.ag-M.hg);
-    const ritmo = dif>=4 ? 0.42 : dif>=3 ? 0.58 : dif>=2 ? 0.82
-                : dif<=-3 ? 1.18 : dif<=-2 ? 1.08 : 1;
+    let ritmo = dif>=4 ? 0.42 : dif>=3 ? 0.58 : dif>=2 ? 0.82
+              : dif<=-3 ? 1.18 : dif<=-2 ? 1.10 : 1;
+    // reta final apertada: quem perde por um se joga, quem ganha por um se fecha
+    if(M.min>=70){
+      if(dif===-1) ritmo *= 1.22;
+      else if(dif===1) ritmo *= 0.86;
+    }
     const pChute = clamp(K.SHOT*poss*Math.pow(razao,K.EXP_S)*f.shot*ritmo, 0, 0.42);
     if(rnd()<pChute){
       S.chutes++;
@@ -2199,6 +2301,19 @@ function avisoContratos(L){
   L.noticias = L.noticias.filter(n=>!n.contratos);
   L.noticias.unshift({t:'bad', contratos:true,
     txt:`${el.length===1?'Fim de contrato':'Fins de contrato'}: ${el.slice(0,4).map(p=>p.nome+' ('+p.ovr+')').join(', ')}${el.length>4?` e mais ${el.length-4}`:''} — sem renovação, saem de graça na virada.`});
+}
+
+/* Recuperação semanal: quanto mais cansado, mais o corpo repõe.
+   Quem joga os 90 minutos toda rodada estabiliza perto de 78% — dá pra segurar,
+   mas rodar o elenco rende. Quem fica de fora uma rodada volta zerado. */
+function recuperaSemana(p, treino){
+  const falta = 100 - clamp(p.energia,0,100);
+  let base = 17 + 0.35*falta;
+  if(treino==='fisico') base *= 1.22;
+  else if(treino==='finalizacao') base *= 0.82;
+  if(p.idade>=33) base *= 0.90;
+  else if(p.idade<=21) base *= 1.06;
+  return Math.round(base*(0.88+rnd()*0.24));
 }
 
 function tacticsPadrao(){
@@ -2389,6 +2504,104 @@ function parseElenco(txt, seedBase){
     out.push(novoJogadorReal(seedBase+'-'+i, nome.trim(), pos.trim(), id, o));
   });
   return out;
+}
+
+
+/* ---------- finanças (escala ≈ metade dos valores reais do futebol brasileiro) ---------- */
+const FIN = {
+  TV:    [0, 30, 45, 65, 95, 165],      // R$ mi/ano por tamanho de torcida (1..5): cota de TV
+  PATRO: [0, 15, 30, 55, 110, 290],     // patrocínio + marketing + sócio-torcedor
+  ESTRUTURA: 0.40,                      // fatia da receita fixa que vai em estrutura (CT, funcionários, estádio)
+  TETO: 0.52,                           // folha anual sustentável = 52% da receita fixa
+  CAIXA0: 0.25,                         // caixa inicial = 1/4 da receita fixa anual
+  ESTOURO: 0.30                         // multa semanal sobre o que passa do teto
+};
+
+function torcidaDe(c){ return clamp(Math.round((c&&c.torcida)||1),1,5); }
+
+function receitaFixaAnual(c){ const t=torcidaDe(c); return (FIN.TV[t]+FIN.PATRO[t])*1e6; }
+
+function tetoFolhaDe(c){ return Math.round(receitaFixaAnual(c)*FIN.TETO/12/1000)*1000; }
+
+function caixaInicial(c){ return Math.round(receitaFixaAnual(c)*FIN.CAIXA0/1e5)*1e5; }
+
+function ingressoMedio(c, compId){ return 22 + torcidaDe(c)*5 + (compId==='continental'?10:compId==='copa'?4:0); }
+
+function premioPosicao(pos){ return pos>=1 && pos<=16 ? Math.round((24-(pos-1)*1.2)*1e6) : 0; }
+
+function extratoSemanal(c, jogosCasa){
+  const fixa=receitaFixaAnual(c)/52;
+  const estrutura=fixa*FIN.ESTRUTURA;
+  const folha=folhaDe(c.id)/4.33;
+  const teto=(c.tetoFolha||tetoFolhaDe(c))/4.33;
+  const estouro = folha>teto ? (folha-teto)*FIN.ESTOURO : 0;
+  let bilheteria=0;
+  (jogosCasa||[]).forEach(g=>{ if(g&&g.publico) bilheteria += g.publico*ingressoMedio(c, g.compId); });
+  const total = fixa + bilheteria - estrutura - folha - estouro;
+  return {tv:FIN.TV[torcidaDe(c)]*1e6/52, patro:FIN.PATRO[torcidaDe(c)]*1e6/52, bilheteria, estrutura, folha, estouro, total};
+}
+
+function semanaFinanceira(c, jogosCasa){
+  const e=extratoSemanal(c, jogosCasa);
+  c.caixa += Math.round(e.total);
+  c.ultimoExtrato = {tv:e.tv, patro:e.patro, bilheteria:e.bilheteria, estrutura:e.estrutura, folha:e.folha, estouro:e.estouro, total:e.total};
+  return e;
+}
+
+// Na criação da liga: salários e caixa de cada clube passam a caber na receita dele.
+// O mesmo jogador ganha mais no Flamengo do que no Mirassol — como na vida real.
+function ajustarFinancasIniciais(L){
+  L.clubs.forEach(c=>{
+    if(typeof ehEuropeu==='function' && ehEuropeu(c.id)) return;
+    const el=L.squads[c.id]||[]; if(!el.length) return;
+    const teto=tetoFolhaDe(c);
+    const folha=el.reduce((s,p)=>s+p.salario,0);
+    const esc=clamp(teto*0.95/Math.max(1,folha), 0.30, 1.25);
+    c.escSal=Math.round(esc*100)/100; c.tetoFolha=teto;
+    el.forEach(p=>{ p.salario=Math.max(30000, Math.round(p.salario*esc/1000)*1000); });
+    c.caixa=caixaInicial(c);
+  });
+}
+
+function prepararElencosIniciais(L){
+  if(typeof calibrarPelaTabela==='function') calibrarPelaTabela(L);   // sempre antes da 1ª rodada (determinismo)
+  if(typeof marcarEstrelas==='function') marcarEstrelas(L);
+  ajustarFinancasIniciais(L);
+}
+
+function jogosEmCasaDoSlot(L, cid, slot){
+  const out=[];
+  if(typeof jogosDoSlotComResultado!=='function') return out;
+  jogosDoSlotComResultado(L, slot).forEach(j=>{
+    if(j.h!==cid || j.hg===null) return;
+    const r=j.comp.resultados[j.chave];
+    if(r && !r.contabilizado){ out.push({publico:r.publico||0, compId:j.comp.id}); r.contabilizado=true; }
+  });
+  return out;
+}
+
+function telaFinancas(){
+  const c=meuClube(); if(!c) return;
+  const e=c.ultimoExtrato || extratoSemanal(c, []);
+  const teto=c.tetoFolha||tetoFolhaDe(c), folha=folhaDe(c.id);
+  const lin=(n,v,neg)=>`<div class="between sm"><span class="mut">${n}</span><span class="mono" style="color:${neg?'var(--danger)':'var(--ok)'}">${neg?'−':'+'}${dinheiro(Math.abs(v))}</span></div>`;
+  sheet('Finanças · '+esc(c.nome), `
+    <div class="card flat" style="margin-bottom:12px">
+      <div class="eyebrow" style="margin-bottom:6px">Última semana</div>
+      ${lin('Cota de TV', e.tv)}${lin('Patrocínio e sócios', e.patro)}
+      ${e.bilheteria?lin('Bilheteria', e.bilheteria):''}
+      ${lin('Folha salarial', e.folha, true)}${lin('Estrutura do clube', e.estrutura, true)}
+      ${e.estouro?lin('Multa por estouro da folha', e.estouro, true):''}
+      <hr class="chalk" style="margin:8px 0">
+      <div class="between sm"><span><b>Resultado da semana</b></span><span class="mono" style="color:${e.total<0?'var(--danger)':'var(--ok)'}"><b>${e.total<0?'−':'+'}${dinheiro(Math.abs(e.total))}</b></span></div>
+    </div>
+    <div class="card flat" style="margin-bottom:12px">
+      <div class="between sm"><span class="mut">Caixa</span><span class="mono"><b>${dinheiro(c.caixa)}</b></span></div>
+      <div class="between sm"><span class="mut">Folha mensal</span><span class="mono" style="color:${folha>teto?'var(--danger)':'inherit'}">${dinheiro(folha)}</span></div>
+      <div class="between sm"><span class="mut">Teto da folha</span><span class="mono">${dinheiro(teto)}</span></div>
+      <div class="between sm"><span class="mut">Receita fixa por ano</span><span class="mono">${dinheiro(receitaFixaAnual(c))}</span></div>
+    </div>
+    <p class="xs mut">TV e patrocínio dependem do tamanho da torcida. Bilheteria depende do público nos jogos em casa. Quem passa do teto paga multa toda semana — vender jogador é a saída. No fim do Brasileirão entra a premiação por posição (${dinheiro(premioPosicao(1))} pro campeão).</p>`);
 }
 
 function valorDeMercado(ovr, idade){
@@ -2846,7 +3059,7 @@ function fecharTemporadaNovaBase(L){
   const tb=tabelaComp(L,L.comps.brasileirao);
   const pos=tb.findIndex(x=>x.id===L.meuClube)+1;
   L.temporadaFim=true;
-  tb.forEach((x,i)=>{ const cl=L.clubs.find(c=>c.id===x.id); if(cl) cl.caixa+=Math.round((20-i)*1400000+(i===0?22000000:0)); });
+  tb.forEach((x,i)=>{ const cl=L.clubs.find(c=>c.id===x.id); if(cl) cl.caixa+=premioPosicao(i+1); });
   const campeao=clube(tb[0].id);
   if(tb[0].id===L.meuClube){ L.titulos=L.titulos||[]; L.titulos.push({comp:'Brasileirão Série A',ano:L.temporada}); }
   L.historico.unshift({ano:L.temporada, campeao:campeao.nome, minhaPos:pos, pts:tb[pos-1].p,
@@ -2926,35 +3139,18 @@ function aplicarSemana(L){
   const c=meuClube();
   const folha=folhaDe(c.id);
   const teto=tetoFolha(c);
-  c.caixa -= Math.round(folha/4.3);
-  // receitas fixas: TV + patrocínio, proporcional ao tamanho do clube
-  c.caixa += Math.round(250000 + c.torcida*560000);
-  // bilheteria dos jogos em casa desta semana
-  compsAtivas(L).forEach(comp=>{
-    Object.keys(comp.resultados).forEach(ch=>{
-      const r=comp.resultados[ch];
-      if(r.contabilizado) return;
-      const partes=ch.split('_');
-      const h=partes[1];
-      if(h===c.id && r.publico){
-        const ingresso = 24 + c.torcida*10 + (comp.id==='continental'?12:0);
-        c.caixa += Math.round(r.publico*ingresso);
-      }
-      r.contabilizado=true;
-    });
+  // finanças de todos os clubes brasileiros (TV, patrocínio, bilheteria, folha, estrutura)
+  L.clubs.forEach(cl=>{
+    if(typeof ehEuropeu==='function' && ehEuropeu(cl.id)) return;
+    semanaFinanceira(cl, jogosEmCasaDoSlot(L, cl.id, L.slot));
   });
-  // estouro de folha pesa no caixa
-  if(folha>teto){
-    c.caixa -= Math.round((folha-teto)*0.30);
-    if(L.slot%6===0) L.noticias.unshift({t:'bad',txt:`A diretoria cobrou pelo estouro da folha salarial (${dinheiro(folha)} contra teto de ${dinheiro(teto)}).`});
-  }
+  if(folha>teto && L.slot%6===0) L.noticias.unshift({t:'bad',txt:`A diretoria cobrou pelo estouro da folha salarial (${dinheiro(folha)} contra teto de ${dinheiro(teto)}).`});
   // recuperação, evolução
   Object.keys(L.squads).forEach(cid=>{
     const meu = cid===L.meuClube;
     const treino = meu?L.treino:'equilibrado';
     L.squads[cid].forEach(p=>{
-      let rec = treino==='fisico'?ri(19,27):treino==='finalizacao'?ri(10,17):ri(14,21);
-      p.energia=clamp(p.energia+rec,0,100);
+      p.energia=clamp(p.energia+recuperaSemana(p, treino),0,100);
       if(p.lesao>0) p.lesao=Math.max(0,p.lesao-1);
       let ganho=0;
       if(p.ovr<p.pot){
@@ -3210,8 +3406,10 @@ function precoPedido(cid, p){
 
 function salarioPedido(p, meuClube){
   const c=clube(meuClube);
-  const prestigio = c && c.torcida>=4 ? .93 : c && c.torcida<=1 ? 1.12 : 1;
-  return Math.round(p.salario*(1.12+ (p.ovr>=78?0.22:p.ovr>=72?0.12:0.04))*prestigio/1000)*1000;
+  const esc = c && c.escSal ? c.escSal : 1;
+  const premio = 1.05 + (p.ovr>=78?0.20:p.ovr>=72?0.10:0.04);
+  const base = Math.max(p.salario*1.05, salarioDe(p.ovr,p.idade)*esc);
+  return Math.round(base*premio/1000)*1000;
 }
 
 function folhaDe(cid){ return (L.squads[cid]||[]).reduce((s,p)=>s+p.salario,0); }
@@ -4128,7 +4326,10 @@ function instrPadrao(){
     subs:[ {on:true, quando:'energia', valor:55, entra:null},
            {on:true, quando:'minuto',  valor:65, entra:null},
            {on:false,quando:'perdendo',valor:60, entra:null} ],
-    penalti:null, falta:null
+    penalti:null, falta:null,
+    momentos: (typeof momentosPadrao==='function') ? momentosPadrao()
+             : [{min:30,perdendo:'pressao',empatando:'manter',ganhando:'manter'},
+                {min:70,perdendo:'ofensivo',empatando:'atacante',ganhando:'segurar'}]
   };
 }
 
@@ -4359,11 +4560,8 @@ function montarLigaAmigos(seed, code, nomeLiga){
   SERIE_A.forEach(c=>L.clubs.push(clubeJogo(c,L)));
   R.r=Math.random;
   SERIE_A.forEach(c=>garanteElenco(L,c.id));
-  L.clubs.forEach(cl=>{ const el=L.squads[cl.id]||[];
-    cl.tetoFolha=Math.round(el.reduce((s,p)=>s+p.salario,0)*1.18); });
   carregarEuropa(L);                       // Mbappé, Yamal e cia. no mercado
-  if(typeof calibrarPelaTabela==='function') calibrarPelaTabela(L);   // sempre antes da 1ª rodada (determinismo)
-  if(typeof marcarEstrelas==='function') marcarEstrelas(L);
+  prepararElencosIniciais(L);              // calibra pela tabela real, marca craques, ajusta salários e caixa
   const bra=criarComp('brasileirao','Brasileirão Série A','liga', SERIE_A.map(c=>c.id));
   bra.fixtures=roundRobin(bra.clubes,2);
   bra.slots=(()=>{const a=[];for(let i=0;i<38;i++)a.push(1+i);return a;})();
@@ -4536,13 +4734,10 @@ function resumoPeriodo(de, ate, posAntes){
 
 function aplicarSemanaAmigos(){
   // economia: todo clube da liga fatura e paga folha (igual em todos os aparelhos)
-  clubesDaLiga().forEach(c=>{
-    c.caixa -= Math.round(folhaDe(c.id)/4.3);
-    c.caixa += Math.round(500000 + c.torcida*950000);
-  });
+  clubesDaLiga().forEach(c=>{ semanaFinanceira(c, jogosEmCasaDoSlot(L, c.id, L.slot)); });
   Object.keys(L.squads).forEach(cid=>{
     L.squads[cid].forEach(p=>{
-      p.energia=clamp(p.energia+ri(24,34),0,100);
+      p.energia=clamp(p.energia+recuperaSemana(p, L.treino),0,100);
       if(p.lesao>0) p.lesao=Math.max(0,p.lesao-1);
       let ganho=0;
       if(p.ovr<p.pot) ganho=(p.idade<=19?0.185:p.idade<=21?0.155:p.idade<=23?0.115:p.idade<=26?0.058:p.idade<=29?0.028:0.014)*fatorDesempenho(p);
@@ -4742,6 +4937,58 @@ function tratarPausa(){
   if(p.tipo==='intervalo') sheetIntervalo();
   else if(p.tipo==='penalti') sheetPenalti(p.side);
   else if(p.tipo==='lesao') sheetLesao(p.side,p.uid);
+  else if(p.tipo==='momento') sheetMomento(p.side, p.k);
+}
+
+/* Momento de decisão: o jogo para e você escolhe. A opção do seu plano
+   vem marcada — é só confirmar se estiver de acordo. */
+const OPCOES_MOMENTO = [
+  ['manter','pressao','recuar','curto','direto','lados'],
+  ['manter','ofensivo','total','segurar','atacante','zagueiro']
+];
+
+function sheetMomento(side, k){
+  const S = side==='h'?M.h:M.a, O = side==='h'?M.a:M.h;
+  const meu = side==='h'?M.hg:M.ag, dele = side==='h'?M.ag:M.hg;
+  const sit = situacaoDe(M,S);
+  const plano = acaoDoMomento(M,S,k);
+  const eu=S.emCampo.filter(u=>!u.fora);
+  const cansados=eu.filter(u=>u.energia<62).length;
+  const posse=Math.round(100*S.posse/Math.max(1,M.min));
+  const bancoAta=entraDoBanco(S,'ATA'), bancoZag=entraDoBanco(S,'ZAG');
+  const opcoes=OPCOES_MOMENTO[k].filter(a=>{
+    if(a==='atacante') return !!bancoAta && S.subs<3;
+    if(a==='zagueiro') return !!bancoZag && S.subs<3;
+    return true;
+  });
+  sheet(`${M.min}' · sua decisão`, `
+    <div class="board" style="margin-bottom:10px"><div class="board-row">
+      <span class="board-team">${esc(M.h.clube.sigla)}</span><span class="board-score">${M.hg}</span>
+      <span class="board-score" style="opacity:.3;font-size:20px">:</span><span class="board-score">${M.ag}</span>
+      <span class="board-team r">${esc(M.a.clube.sigla)}</span></div>
+      <div class="board-clock">${k===0?'LEITURA DO JOGO':'RETA FINAL'} · ${M.min}'</div></div>
+    <div class="barrinha" style="margin-bottom:10px">
+      <span><b>${posse}%</b>posse</span>
+      <span><b>${S.chutes}</b>chutes</span>
+      <span class="${cansados?'al':''}"><b>${cansados}</b>no limite</span>
+      <span><b>${3-S.subs}</b>trocas</span>
+    </div>
+    <p class="sm mut" style="margin-bottom:10px">Você está <b>${sit}</b>${k===0?'. Ainda dá tempo de mudar a cara do jogo.':'. É agora ou não é mais.'}</p>
+    <div class="stack">
+      ${opcoes.map(a=>`<button class="btn wide ${a===plano?'pri':''}" style="flex-direction:column;align-items:flex-start;padding:11px 13px;height:auto"
+        onclick="escolherMomento('${side}',${k},'${a}')">
+        <span style="font-size:14.5px">${ACOES_MOMENTO[a].n}${a===plano?' · do seu plano':''}</span>
+        <span style="font-family:var(--fb);font-weight:400;text-transform:none;letter-spacing:0;font-size:11.5px;color:inherit;opacity:.72;text-align:left">${ACOES_MOMENTO[a].d}</span>
+      </button>`).join('')}
+    </div>`);
+}
+
+function escolherMomento(side, k, acao){
+  const S = side==='h'?M.h:M.a;
+  const txt = aplicarAcaoMomento(M,S,acao);
+  if(txt){ const e=ev(M,'sys',side,'Banco: '+txt,'sys'); addEvento(e); }
+  else { const e=ev(M,'sys',side,'Banco: o time segue como está.','sys'); addEvento(e); }
+  retomar();
 }
 
 function retomar(){ fecharSheet(); if(VEL!=='pausado') iniciarTick(); desenharMatch(); }
@@ -5072,6 +5319,7 @@ function fecharTemporadaNova(L){
 function fecharTemporadaAmigos(){
   const tb=tabela(L);
   L.temporadaFim=true;
+  tb.forEach((x,i)=>{ const cl=clube(x.id); if(cl) cl.caixa+=premioPosicao(i+1); });
   L.noticias.unshift({t:'led',txt:`${clube(tb[0].id).nome} é campeão da ${L.nome}!`});
   if(tb[0].id===L.meuClube){
     const c=meuClube();
@@ -6319,6 +6567,27 @@ function renderInstrucoes(t,el,amigos){
   </div>
 
   <div class="card">
+    <div class="eyebrow" style="margin-bottom:2px">Momentos do jogo</div>
+    <p class="xs mut" style="margin:0 0 8px">Duas decisões que mudam a partida. ${amigos
+      ? 'Como a rodada roda igual em todos os celulares, deixe escolhido o que você faria em cada situação.'
+      : 'Se você assistir ao jogo, ele para e pergunta — com a sua escolha já marcada.'}</p>
+    ${(i.momentos||momentosPadrao()).map((m,k)=>`
+      <div style="padding:8px 0;border-bottom:${k===0?'1px dashed var(--line2)':'0'}">
+        <div class="row sm" style="gap:6px;margin-bottom:6px">
+          <b style="flex:1">${k===0?'Leitura do jogo':'Reta final'}</b>
+          <select class="inp" style="width:86px;padding:6px" onchange="iMom(${k},'min',+this.value)">
+            ${opt(m.min, k===0?[[25,"25'"],[30,"30'"],[35,"35'"],[40,"40'"]]:[[60,"60'"],[65,"65'"],[70,"70'"],[75,"75'"],[80,"80'"]])}</select>
+        </div>
+        ${[['perdendo','Perdendo'],['empatando','Empatando'],['ganhando','Ganhando']].map(([sit,rot])=>`
+          <div class="row sm" style="gap:6px;margin-bottom:5px">
+            <span class="mut" style="width:82px">${rot}</span>
+            <select class="inp" style="flex:1;padding:6px" onchange="iMom(${k},'${sit}',this.value)">
+              ${opt(m[sit], OPCOES_MOMENTO[k].map(a=>[a, ACOES_MOMENTO[a].n]))}</select>
+          </div>`).join('')}
+      </div>`).join('')}
+  </div>
+
+  <div class="card">
     <div class="eyebrow" style="margin-bottom:6px">Batedor de pênalti</div>
     <select class="inp" onchange="i0raw('penalti',this.value||null)">
       <option value="">Quem estiver em campo decide</option>
@@ -6339,6 +6608,12 @@ function renderInstrucoes(t,el,amigos){
 function i0(grupo,campo,v){const t=garanteTactics(L,L.meuClube);t.instr[grupo][campo]=v;salvar();if(campo==='on'||campo==='quando')render();}
 
 function i0raw(campo,v){const t=garanteTactics(L,L.meuClube);t.instr[campo]=v;salvar();}
+
+function iMom(k,campo,v){
+  const t=garanteTactics(L,L.meuClube);
+  if(!t.instr.momentos) t.instr.momentos=momentosPadrao();
+  t.instr.momentos[k][campo]=v; salvar(); render();
+}
 
 function iSub(k,campo,v){const t=garanteTactics(L,L.meuClube);t.instr.subs[k][campo]=v;
   if(campo==='quando') t.instr.subs[k].valor = v==='energia'?55:65;
@@ -6459,11 +6734,10 @@ function iniciarCarreira(clubId){
   aplicarTemaClube(L.clubs.find(x=>x.id===clubId));
   R.r = Math.random;
   SERIE_A.forEach(c=>garanteElenco(L,c.id));
-  L.clubs.forEach(cl=>{ const el=L.squads[cl.id]||[];
-    cl.tetoFolha = Math.round(el.reduce((s2,p2)=>s2+p2.salario,0)*1.18); });
   montarTemporada(L);
   (L.comps.estadual?L.comps.estadual.clubes:[]).forEach(id=>garanteElenco(L,id));
   carregarEuropa(L);
+  prepararElencosIniciais(L);
   const c=meuClube();
   L.managers[clubId]={id:'eu',nome:'Você'};
   L.diretoria=metaDiretoriaReal(c);
@@ -6676,7 +6950,7 @@ function novaTemporadaBase(){
     L.squads[cid].forEach(p=>{
       p.idade++; p.contrato--; p.jogos=0;p.gols=0;p.assist=0;p.ca=0;p.cv=0;p.notaSoma=0;
       p.forma=ri(48,70); p.energia=100; p.lesao=0; p.aVenda=false; p.ovr0=p.ovr;
-      p.salario=salarioDe(p.ovr,p.idade); p.valor=valorDeMercado(p.ovr,p.idade);
+      p.salario=Math.max(30000, Math.round(salarioDe(p.ovr,p.idade)*((clube(cid)||{}).escSal||1)/1000)*1000); p.valor=valorDeMercado(p.ovr,p.idade);
       // clubes da IA renovam com quem interessa — só o seu clube precisa cuidar disso na mão
       if(p.contrato<=0 && cid!==L.meuClube){
         const querRenovar = p.idade<34 && Math.random() < (p.ovr>=75?0.94 : p.ovr>=68?0.82 : 0.6);
@@ -6705,7 +6979,7 @@ function novaTemporadaBase(){
       if(cria && cid===L.meuClube && pot-ovr>=16)
         L.noticias.push({t:'good', txt:`${nome} (${idade} anos) sobe da base. O departamento acha que pode virar coisa grande.`});
       L.squads[cid].push({id:'p'+(_pid++),nome,pos:falta.length?pick(falta):pick(ELENCO_BASE),idade,ovr,pot,ovrF:ovr,cria:cria&&cid===L.meuClube,
-        forma:ri(48,70),moral:ri(55,80),energia:100,salario:salarioDe(ovr,idade),valor:valorDeMercado(ovr,idade),
+        forma:ri(48,70),moral:ri(55,80),energia:100,salario:Math.max(30000,Math.round(salarioDe(ovr,idade)*((clube(cid)||{}).escSal||1)/1000)*1000),valor:valorDeMercado(ovr,idade),
         contrato:ri(2,4),gols:0,assist:0,jogos:0,ca:0,cv:0,notaSoma:0,lesao:0,aVenda:false});
       R.r=r0;
     }
@@ -7185,7 +7459,7 @@ function renderHomeBase(){
     </div>` : cardProximo(prox, semana)}
 
   <div class="barrinha">
-    <span><b>${dinheiro(c.caixa)}</b>caixa</span>
+    <span onclick="telaFinancas()" style="cursor:pointer"><b>${dinheiro(c.caixa)}</b>caixa ›</span>
     <span><b>${(garanteTactics(L,c.id).formacao)||'4-4-2'}</b>esquema</span>
     <span class="${lesionados?'al':''}"><b>${lesionados}</b>lesionados</span>
     <span class="${cansados>3?'al':''}"><b>${cansados}</b>desgastados</span>
@@ -7261,7 +7535,7 @@ function renderHomeAmigos(){
     </div>`:'<div class="card"><p class="empty">Sem jogo nesta rodada.</p></div>'}
 
   <div class="barrinha">
-    <span><b>${dinheiro(c.caixa)}</b>caixa</span>
+    <span onclick="telaFinancas()" style="cursor:pointer"><b>${dinheiro(c.caixa)}</b>caixa ›</span>
     <span><b>${(garanteTactics(L,c.id).formacao)||'4-4-2'}</b>esquema</span>
     <span class="${lesionados?'al':''}"><b>${lesionados}</b>lesionados</span>
     <span><b>${Object.keys(L.managers).length}</b>técnicos</span>
@@ -7468,8 +7742,31 @@ function codigoOrdens(cid, ate){
     (i.perdendo.on?1:0)+''+i.perdendo.min+''+i.perdendo.ment[0]+'-'+(i.ganhando.on?1:0)+''+i.ganhando.min+''+i.ganhando.ment[0],
     i.subs.map(s=>(s.on?1:0)+s.quando[0]+s.valor+(s.entra||'')).join('.'),
     i.penalti||'',
-    lances, vendas, nome, posic, (i.falta||'')
+    lances, vendas, nome, posic, (i.falta||''), codMomentos(i.momentos)
   ].join('|');
+}
+
+const MOM_LETRA = {manter:'m', pressao:'p', recuar:'r', curto:'c', direto:'d', lados:'l',
+                   ofensivo:'o', total:'t', segurar:'s', atacante:'a', zagueiro:'z'};
+
+function codMomentos(ms){
+  const base=(typeof momentosPadrao==='function')?momentosPadrao():[];
+  const L2=MOM_LETRA;
+  return (ms&&ms.length?ms:base).slice(0,2).map((m,k)=>{
+    const d=base[k]||{min:k?70:30,perdendo:'manter',empatando:'manter',ganhando:'manter'};
+    return (m.min||d.min)+(L2[m.perdendo]||'m')+(L2[m.empatando]||'m')+(L2[m.ganhando]||'m');
+  }).join('.');
+}
+
+function lerMomentos(txt){
+  const inv={}; Object.keys(MOM_LETRA).forEach(k=>inv[MOM_LETRA[k]]=k);
+  const base=(typeof momentosPadrao==='function')?momentosPadrao():null;
+  const out=String(txt||'').split('.').filter(Boolean).map(x=>{
+    const m=x.match(/^(\d+)(.)(.)(.)$/); if(!m) return null;
+    return {min:parseInt(m[1],10), perdendo:inv[m[2]]||'manter',
+            empatando:inv[m[3]]||'manter', ganhando:inv[m[4]]||'manter'};
+  }).filter(Boolean);
+  return out.length===2 ? out : base;
 }
 
 function lerCodigoOrdens(txt){
@@ -7495,6 +7792,7 @@ function lerCodigoOrdens(txt){
     });
     tac.instr.penalti=p[9]||null;
     tac.instr.falta=p[14]||null;
+    if(p[15]){ const ms=lerMomentos(p[15]); if(ms) tac.instr.momentos=ms; }
   }catch(e){}
   if(p[13]){
     const o={};
@@ -7891,7 +8189,7 @@ const FIREBASE_CFG = {
 };
 
 const VERSAO_JOGO = '2.0';
-const SITE_JOGO = 'https://rafareyna.github.io/vestiario/';
+const SITE_JOGO = 'https://rafaelsivierireyna10.github.io/vestiario/';
 
 let FB = { app:null, db:null, uid:null, ok:false, erro:null, pronto:null, conectado:false };
 let ON = null;                 // estado vivo da liga online aberta
@@ -8482,7 +8780,7 @@ function renderHomeOnline(){
     </div>`:''}
 
   <div class="barrinha">
-    <span><b>${dinheiro(c.caixa)}</b>caixa</span>
+    <span onclick="telaFinancas()" style="cursor:pointer"><b>${dinheiro(c.caixa)}</b>caixa ›</span>
     <span><b>${(garanteTactics(L,c.id).formacao)||'4-4-2'}</b>esquema</span>
     <span class="${lesionados?'al':''}"><b>${lesionados}</b>lesionados</span>
     <span><b>${cids.length}</b>técnicos</span>
