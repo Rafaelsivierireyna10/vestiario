@@ -1180,7 +1180,9 @@ html[data-pele="bf"] .tbl tbody tr.z-reb td,html[data-pele="bf"] .tbl tbody tr.z
 .vg-info span:nth-child(2){flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .vg-min{font-family:var(--fm);font-weight:700;color:var(--ink);background:var(--surface2);padding:1px 6px;border-radius:4px}
 .vg-campo{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#0c3d26}
-.vg-svg{display:block;width:100%;height:auto}
+.vg-svg{display:block;width:100%;height:auto;max-height:60vh;margin:0 auto}
+.vg-campo{display:flex;justify-content:center}
+.vg-campo .vg-legenda{left:0;right:0}
 .vg-peca{cursor:pointer}
 .vg-legenda{position:absolute;left:0;right:0;bottom:0;display:flex;justify-content:space-between;padding:3px 8px;
   font-family:var(--fx);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);
@@ -1245,8 +1247,9 @@ html[data-pele="bf"] .tbl tbody tr.z-reb td,html[data-pele="bf"] .tbl tbody tr.z
 .est-nome span{font-size:11px;opacity:.85}
 
 /* camisa na tela de tática (no lugar do disco) */
-.spot-num{background:transparent!important;box-shadow:none!important;border:0!important;width:40px;height:40px;overflow:visible;margin-bottom:3px}
-.spot-num svg{width:40px;height:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
+.spot .spot-num,.spot span.spot-num{background:transparent!important;box-shadow:none!important;border:0!important;width:44px;height:44px;
+  overflow:visible!important;margin:0 auto 4px;display:grid;place-items:center}
+.spot .spot-num svg{width:44px;height:44px;overflow:visible;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}
 .spot.warn .spot-num svg{filter:drop-shadow(0 0 3px #FFD98A) drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .spot.bad .spot-num svg{filter:drop-shadow(0 0 3px #F3A79E) drop-shadow(0 2px 4px rgba(0,0,0,.45))}
 .spot.alvo-drop .spot-num{transform:scale(1.18)}
@@ -1320,6 +1323,29 @@ html[data-pele="bf"] .tbl tbody tr.z-reb td,html[data-pele="bf"] .tbl tbody tr.z
 @media (prefers-reduced-motion:reduce){ .gol-papel,.gol-onda{display:none} }
 
 @keyframes passeSome{0%{opacity:.75}60%{opacity:.45}100%{opacity:0}}
+
+/* ---------- qualidades do jogador ---------- */
+.atr-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 12px}
+.atr{display:grid;grid-template-columns:1fr 46px 22px;align-items:center;gap:6px;font-size:10.5px}
+.atr-n{color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atr.chave .atr-n{color:var(--ink2);font-weight:600}
+.atr-b{height:5px;border-radius:3px;background:var(--line2);overflow:hidden}
+.atr-b i{display:block;height:100%;border-radius:3px}
+.atr b{font-family:var(--fm);font-size:11px;text-align:right}
+.el-info i.q{font-style:normal;font-family:var(--fm);font-size:9px;letter-spacing:.02em;color:var(--ink2);
+  background:var(--surface2);border-radius:3px;padding:0 4px;margin-left:4px}
+@media (max-width:360px){ .atr-grid{grid-template-columns:1fr} }
+
+/* o campo da tática é menor: a camisa tem que caber na casinha, não transbordar */
+#pitchTac .spot-num, #pitchTac span.spot-num{width:38px;height:38px}
+#pitchTac .spot-num svg{width:38px;height:38px}
+
+/* o botão: número legível, brilho em quem está com a bola */
+.bot-num{font-size:2.7px!important;paint-order:stroke;stroke:rgba(0,0,0,.35);stroke-width:.45px}
+.bot.ativo .bot-num{font-size:3px!important}
+.bot.ativo .bot-c{filter:drop-shadow(0 0 1.4px #fff) drop-shadow(0 0 3px rgba(255,216,107,.9))}
+.bot-sombra{fill:rgba(0,0,0,.3)}
+#bola{filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.5))}
 </style>
 </head><body style="margin:0">
 <div id="app">
@@ -1730,84 +1756,84 @@ const ESTADUAIS = {
 
 const ELENCOS_REAIS = {
 fla:`Agustín Rossi|GOL|30|81;Andrew|GOL|26|72;Dyogo Alves|GOL|22|66;
-Léo Pereira|ZAG|30|79;Léo Ortiz|ZAG|30|80;Danilo|ZAG|34|78;Vitão|ZAG|26|77;João Victor|ZAG|27|74;Daniel Sales|ZAG|21|68;
-Alex Sandro|LAT|35|77;Ayrton Lucas|LAT|28|78;Emerson Royal|LAT|27|78;Guillermo Varela|LAT|32|77;Daniel Thuram|LAT|20|67;
-Erick Pulgar|VOL|32|78;Jorginho|VOL|34|80;Evertton Araujo|VOL|23|71;Caio Garcia|VOL|20|67;
+Léo Ortiz|ZAG|30|80;Léo Pereira|ZAG|30|79;Danilo|ZAG|34|78;Vitão|ZAG|26|77;João Victor|ZAG|27|74;Daniel Sales|ZAG|21|68;
+Ayrton Lucas|LAT|28|78;Emerson Royal|LAT|27|78;Alex Sandro|LAT|35|77;Guillermo Varela|LAT|32|77;Daniel Thuram|LAT|20|67;
+Jorginho|VOL|34|80;Erick Pulgar|VOL|32|78;Evertton Araujo|VOL|23|71;Caio Garcia|VOL|20|67;
 Giorgian de Arrascaeta|MEI|32|84;Lucas Paquetá|MEI|29|83;Nicolás de la Cruz|MEI|29|81;Saúl Ñíguez|MEI|31|79;Jorge Carrascal|MEI|28|78;Pablo Lucio|MEI|20|68;
-Samuel Lino|PON|26|78;Gonzalo Plata|PON|26|78;Luiz Araújo|PON|30|78;Everton Soares|PON|30|75;Lorran|PON|20|70;Rayan Lucas|PON|19|71;
+Samuel Lino|PON|26|78;Gonzalo Plata|PON|26|78;Luiz Araújo|PON|30|78;Everton Soares|PON|30|75;Rayan Lucas|PON|19|71;Lorran|PON|20|70;
 Pedro Guilherme|ATA|29|82;Bruno Henrique|ATA|35|75;Wallace Yan|ATA|21|71;Anthony Valencia|ATA|22|70`,
 
-pal:`Carlos Miguel|GOL|27|77;Marcelo Lomba|GOL|39|70;Aranha|GOL|22|66;
-Gustavo Gómez|ZAG|33|80;Murilo|ZAG|29|78;Bruno Fuchs|ZAG|27|76;Luis Benedetti|ZAG|22|70;
+pal:`Carlos Miguel|GOL|27|77;Marcelo Lomba|GOL|39|70;Bruno Bertinato|GOL|32|70;Aranha|GOL|22|66;
+Gustavo Gómez|ZAG|33|80;Murilo|ZAG|29|78;Alexander Barboza|ZAG|31|77;Bruno Fuchs|ZAG|27|76;Luis Benedetti|ZAG|22|70;
 Joaquín Piquerez|LAT|28|79;Agustín Giay|LAT|22|74;Khellven|LAT|25|74;Jefté|LAT|22|73;Arthur Gabriel|LAT|20|68;
-Emiliano Martínez|VOL|27|76;Lucas Evangelista|VOL|31|75;Aníbal Moreno|VOL|31|75;Allan Elias|VOL|29|74;
+Emiliano Martínez|VOL|27|76;Lucas Evangelista|VOL|31|75;Allan Elias|VOL|29|74;Marlon Freitas|VOL|31|74;
 Andreas Pereira|MEI|30|79;Felipe Anderson|MEI|33|78;Mauricio|MEI|29|77;Vitor Figueiredo|MEI|21|70;Larson|MEI|21|69;Luis Pacheco|MEI|20|67;
-Jhon Arias|PON|29|80;Ramón Sosa|PON|27|76;Paulinho|PON|26|79;Luighi Hanri|PON|20|71;
+Jhon Arias|PON|29|80;Paulinho|PON|26|79;Ramón Sosa|PON|27|76;Luighi Hanri|PON|20|71;
 Vitor Roque|ATA|21|79;José López|ATA|25|77;Bruno Rodrigues|ATA|29|74;Riquelme Fillipi|ATA|20|68`,
 
 cor:`Hugo Souza|GOL|27|79;Matheus Donelli|GOL|24|71;Felipe Longo|GOL|22|68;
 Gabriel Paulista|ZAG|35|77;Andre Ramalho|ZAG|34|76;Gustavo Henrique|ZAG|33|73;João Pedro Tchoca|ZAG|25|73;Cauã Ribeiro|ZAG|20|67;
 Matheuzinho|LAT|26|76;Matheus Bidu|LAT|27|74;Fabrizio Angileri|LAT|32|73;Hugo|LAT|29|71;Pedro Milans|LAT|27|71;
 Raniele|VOL|29|75;Breno Bidon|VOL|21|73;Charles|VOL|30|73;Alex Santana|VOL|31|72;André Luiz|VOL|22|70;
-Rodrigo Garro|MEI|28|79;Matheus Araújo|MEI|30|79;Andre Carrillo|MEI|35|78;Zakaria Labyad|MEI|33|72;Allan Rodrigues|MEI|29|73;Dieguinho|MEI|20|68;
+Rodrigo Garro|MEI|28|79;Matheus Araújo|MEI|30|79;Andre Carrillo|MEI|35|78;Allan Rodrigues|MEI|29|73;Zakaria Labyad|MEI|33|72;Dieguinho|MEI|20|68;
 Vitinho Mendes|PON|27|73;Kaio César|PON|21|70;Guilherme Pires|PON|20|68;
 Memphis Depay|ATA|32|83;Yuri Alberto|ATA|25|79;Jesse Lingard|ATA|34|74;Pedro Raul|ATA|29|74;Gui Negão|ATA|20|71;Kayke Ferrari|ATA|20|69`,
 
 sao:`Rafael|GOL|36|79;Carlos Coronel|GOL|29|75;Young|GOL|21|66;
-Robert Arboleda|ZAG|34|77;Nahuel Ferraresi|ZAG|27|76;Rafael Tolói|ZAG|35|76;Rodriguinho Rocha|ZAG|29|75;Sabino|ZAG|29|73;Dória|ZAG|32|72;
-Wendell|LAT|32|76;Enzo Díaz|LAT|30|74;Cédric Soares|LAT|34|74;Igor Felisberto|LAT|22|70;Maik|LAT|23|71;
-Pablo Maia|VOL|24|76;Damián Bobadilla|VOL|24|74;Marcos Antônio|VOL|26|75;Alisson|VOL|32|74;Hugo Leonardo|VOL|21|69;
+Robert Arboleda|ZAG|34|77;Domingos Duarte|ZAG|31|77;Rafael Tolói|ZAG|35|76;Rodriguinho Rocha|ZAG|29|75;Sabino|ZAG|29|73;Dória|ZAG|32|72;
+Wendell|LAT|32|76;Enzo Díaz|LAT|30|74;Cédric Soares|LAT|34|74;Maik|LAT|23|71;Igor Felisberto|LAT|22|70;
+Pablo Maia|VOL|24|76;Marcos Antônio|VOL|26|75;Damián Bobadilla|VOL|24|74;Alisson|VOL|32|74;Newton|VOL|23|71;Hugo Leonardo|VOL|21|69;
 Oscar|MEI|34|78;Luciano|MEI|33|77;Luan Santos|MEI|23|72;Daniel Alonso|MEI|30|72;Pedro Ferreira|MEI|20|68;
-Ferreirinha|PON|27|75;Lucca|PON|20|71;Paulo Sérgio|PON|22|70;
-Lucas Moura|ATA|34|80;Jonathan Calleri|ATA|32|79;Gonzalo Tapia|ATA|24|74;André Silva|ATA|29|74;Ryan Francisco|ATA|20|72`,
+Ferreirinha|PON|27|75;Victor Sá|PON|27|72;Lucca|PON|20|71;Paulo Sérgio|PON|22|70;
+Lucas Moura|ATA|34|80;Jonathan Calleri|ATA|32|79;André Silva|ATA|29|74;Ryan Francisco|ATA|20|72`,
 
-san:`Gabriel Brazão|GOL|25|76;João Paulo|GOL|30|74;Diogenes|GOL|22|67;
+san:`Gabriel Brazão|GOL|25|76;Diogenes|GOL|22|67;
 Lucas Veríssimo|ZAG|30|76;Alexis Duarte|ZAG|25|74;Luan Peres|ZAG|32|74;João Paulo Ananias|ZAG|22|69;João Alencar|ZAG|22|68;
 Rodinei|LAT|34|75;Igor Vinícius|LAT|29|73;Gonzalo Escobar|LAT|28|73;Vinicius Rodrigues Lira|LAT|22|69;
 João Schmidt|VOL|33|74;Willian Arão|VOL|34|74;Christian Oliva|VOL|30|74;Samuel Mendes|VOL|21|68;
 Neymar|MEI|34|85;Benjamín Rollheiser|MEI|26|77;Gabriel Menino|MEI|26|75;Thaciano|MEI|31|74;Arthur Gomes|MEI|23|72;Gabriel Bontempo|MEI|21|69;
 Álvaro Barreal|PON|26|75;Miguelito|PON|22|72;Gustavinho|PON|21|70;Pepê Fermino|PON|22|69;
-Rony|ATA|31|75;Tiquinho Soares|ATA|34|75;Moisés|ATA|29|73;Gustavo Caballero|ATA|28|74;Mateus Xavier|ATA|21|68`,
+Gabigol|ATA|30|78;Rony|ATA|31|75;Tiquinho Soares|ATA|34|75;Gustavo Caballero|ATA|28|74;Moisés|ATA|29|73;Mateus Xavier|ATA|21|68`,
 
 vas:`Léo Jardim|GOL|31|79;Daniel Fuzato|GOL|29|72;Pablo|GOL|22|66;
-João Victor Ferreira|ZAG|27|75;Mauricio Lemos|ZAG|30|74;Lucas Freitas|ZAG|24|73;Luiz Gustavo|ZAG|22|70;Riquelme|ZAG|21|69;
-Lucas Piton|LAT|26|76;Paulo Henrique|LAT|29|74;José Luis Rodríguez|LAT|30|73;Victor Luis|LAT|32|71;
-Hugo Moura|VOL|27|74;Juan Sforza|VOL|24|73;Tchê Tchê|VOL|33|73;Thiago Mendes|VOL|34|73;Mateus Carvalho|VOL|24|71;
-Philippe Coutinho|MEI|33|79;Jair|MEI|26|74;Paulinho Paula|MEI|24|72;Benjamín Garré|MEI|25|73;Guilherme Estrella|MEI|21|70;Leandrinho|MEI|20|69;
-Adson|PON|27|73;David|PON|26|74;Jean Meneses|PON|33|72;Loide Augusto|PON|22|71;
-Pablo Vegetti|ATA|37|77;Rayan|ATA|20|75;Nuno Moreira|ATA|27|75;Alex Teixeira|ATA|36|72`,
+João Victor Ferreira|ZAG|27|75;Mauricio Lemos|ZAG|30|74;Alan Saldivia|ZAG|29|74;Carlos Cuesta|ZAG|25|74;Lucas Freitas|ZAG|24|73;Luiz Gustavo|ZAG|22|70;Riquelme|ZAG|21|69;
+Lucas Piton|LAT|26|76;Johan Rojas|LAT|27|76;Cuiabano|LAT|24|75;Paulo Henrique|LAT|29|74;Puma Rodríguez|LAT|30|73;Victor Luis|LAT|32|71;
+Santiago Sosa|VOL|28|75;Hugo Moura|VOL|27|74;Juan Sforza|VOL|24|73;Tchê Tchê|VOL|33|73;Thiago Mendes|VOL|34|73;Mateus Carvalho|VOL|24|71;
+Jair|MEI|26|74;Benjamín Garré|MEI|25|73;Paulinho Paula|MEI|24|72;Guilherme Estrella|MEI|21|70;Leandrinho|MEI|20|69;
+David|PON|26|74;Adson|PON|27|73;Marino Hinestroza|PON|25|73;Jean Meneses|PON|33|72;Loide Augusto|PON|22|71;
+Brenner|ATA|27|77;Nuno Moreira|ATA|27|75;Alex Teixeira|ATA|36|72;Claudio Spinelli|ATA|23|72`,
 
 cru:`Cássio|GOL|39|77;Léo Aragão|GOL|26|72;Otávio Costa|GOL|21|66;
 Fabrício Bruno|ZAG|30|78;João Marcelo|ZAG|25|74;William|ZAG|31|74;Jonathan Jesus|ZAG|24|71;Kaiki|ZAG|21|69;
-Fagner|LAT|37|73;Lucas Villalba|LAT|27|73;Mateo Gamarra|LAT|24|72;Kauã Prates|LAT|20|68;José Janderson|LAT|23|70;
-Walace|VOL|31|76;Lucas Silva|VOL|33|75;Lucas Romero|VOL|32|73;Christian|VOL|25|73;Japa|VOL|22|69;
-Matheus Pereira|MEI|30|80;Matheus Henrique|MEI|28|77;Eduardo|MEI|29|75;Rodriguinho|MEI|22|71;Murilo Rhikman|MEI|22|70;
-Marquinhos Cipriano|PON|26|75;Wanderson|PON|31|75;Kaique Kenji|PON|20|69;
-Kaio Jorge|ATA|24|79;Gabriel Barbosa|ATA|30|78;Lautaro Díaz|ATA|27|74;Wanderson Gomes|ATA|36|71`,
+Fagner|LAT|37|73;Lucas Villalba|LAT|27|73;Mateo Gamarra|LAT|24|72;José Janderson|LAT|23|70;Kauã Prates|LAT|20|68;
+Lucas Silva|VOL|33|75;Gerson|VOL|29|75;Lucas Romero|VOL|32|73;Christian|VOL|25|73;
+Matheus Pereira|MEI|30|80;Matheus Henrique|MEI|28|77;Rodriguinho|MEI|22|71;
+Marquinhos Cipriano|PON|26|75;Wanderson|PON|31|75;Wesley|PON|22|75;Luis Sinisterra|PON|27|75;Gabriel Pec|PON|26|73;Kaique Kenji|PON|20|69;
+Kaio Jorge|ATA|24|79;Lautaro Díaz|ATA|27|74;Marquinhos|ATA|26|73;Wanderson Gomes|ATA|36|71`,
 
 flu:`Fábio|GOL|45|79;Marcelo Pitaluga|GOL|23|71;Vitor Eudes|GOL|27|70;
-Thiago Silva|ZAG|41|79;Juan Pablo Freytes|ZAG|25|75;Ignácio|ZAG|29|74;Julián Millán|ZAG|28|74;Igor Rabello|ZAG|31|73;
-Guilherme Arana|LAT|29|79;Samuel Xavier|LAT|35|73;Renê|LAT|33|72;Guga|LAT|29|73;Riquelme Felipe|LAT|22|69;
+Thiago Silva|ZAG|41|79;Juan Pablo Freytes|ZAG|25|75;Ignácio|ZAG|29|74;Julián Millán|ZAG|28|74;Igor Rabello|ZAG|31|73;Jemmes|ZAG|22|68;
+Guilherme Arana|LAT|29|79;Samuel Xavier|LAT|35|73;Guga|LAT|29|73;Renê|LAT|33|72;Riquelme Felipe|LAT|22|69;
 Martinelli|VOL|24|76;Hércules|VOL|26|76;Nonato|VOL|28|75;Otávio|VOL|31|74;
-Luciano Acosta|MEI|32|78;Ganso|MEI|36|75;Yago|MEI|24|71;David Terans|MEI|31|73;Ruan Sales|MEI|21|68;
-Keno Ribeiro|PON|29|78;Agustín Canobbio|PON|28|76;Kevin Serna|PON|25|75;Yeferson Soteldo|PON|29|75;
+Luciano Acosta|MEI|32|78;Ganso|MEI|36|75;David Terans|MEI|31|73;Yago|MEI|24|71;Ruan Sales|MEI|21|68;
+Keno Ribeiro|PON|29|78;Jefferson Savarino|PON|29|78;Agustín Canobbio|PON|28|76;Kevin Serna|PON|25|75;Yeferson Soteldo|PON|29|75;
 Hulk|ATA|39|82;Germán Cano|ATA|38|75;John Kennedy|ATA|24|73;Rodrigo Castillo|ATA|23|72;Matheus Reis|ATA|21|68`,
 
 cam:`Everson|GOL|36|78;Gabriel Delfim|GOL|24|71;Robert Alves|GOL|25|69;
-Lyanco|ZAG|29|75;Ruan|ZAG|27|74;Vitão Ferraz|ZAG|26|76;Vitor Hugo|ZAG|35|72;Léo Duarte|ZAG|30|73;Kauã Pascini|ZAG|21|68;
-Renan Guedes|LAT|28|77;Natanael|LAT|26|74;Ángelo Preciado|LAT|28|74;Rômulo|LAT|24|72;
-Alan Franco|VOL|27|75;Fred|VOL|33|75;Maycon|VOL|29|74;Kevin Castaño|VOL|25|75;Tomás Pérez|VOL|22|70;
+Vitão Ferraz|ZAG|26|76;Lyanco|ZAG|29|75;Ruan|ZAG|27|74;Léo Duarte|ZAG|30|73;Ruan Tressoldi|ZAG|25|73;Vitor Hugo|ZAG|35|72;Kauã Pascini|ZAG|21|68;
+Renan Guedes|LAT|28|77;Renan Lodi|LAT|26|76;Natanael|LAT|26|74;Ángelo Preciado|LAT|28|74;Rômulo|LAT|24|72;
+Alan Franco|VOL|27|75;Fred|VOL|33|75;Kevin Castaño|VOL|25|75;Maycon|VOL|29|74;Tomás Pérez|VOL|22|70;
 Gustavo Scarpa|MEI|32|80;Reinier|MEI|24|74;Igor Gomes|MEI|27|74;Patrick|MEI|33|73;Alexsander|MEI|22|73;Victor Hugo|MEI|22|72;
-Bernard|PON|33|76;Tomás Cuello|PON|26|74;Alan Minda|PON|23|73;Dudu|PON|34|74;Cauã Campos Soares|PON|20|68;
+Bernard|PON|33|76;Tomás Cuello|PON|26|74;Dudu|PON|34|74;Alan Minda|PON|23|73;Cauã Campos Soares|PON|20|68;
 Mateo Cassierra|ATA|29|77;Thiago Borbas|ATA|24|74;Mamady Cissé|ATA|22|69`,
 
 gre:`Weverton|GOL|38|78;Gabriel Grando|GOL|27|72;Thiago Beltrame|GOL|22|66;
 Walter Kannemann|ZAG|35|75;Fabián Balbuena|ZAG|34|74;Wagner Leonardo|ZAG|27|74;Gustavo Martins|ZAG|22|72;Vitor Ramon|ZAG|22|69;
-Marcos Rocha|LAT|37|72;Marlon|LAT|31|74;Caio Paulista|LAT|28|73;João Pedro|LAT|24|72;Viery|LAT|21|68;
-Mathias Villasanti|VOL|29|76;Dodi|VOL|31|73;Erick Noriega|VOL|24|73;Juan Nardoni|VOL|24|75;Leonel Pérez|VOL|22|69;
-Willian|MEI|31|76;Arthur Melo|MEI|29|78;Miguel Monsalve|MEI|23|73;Riquelme Freitas|MEI|22|70;Tiaguinho|MEI|21|68;
-Cristian Pavón|PON|30|76;José Enamorado|PON|27|72;Francis Amuzu|PON|27|74;Zortéa|PON|26|72;
-Tetê|ATA|26|78;Martin Braithwaite|ATA|35|76;Carlos Vinícius|ATA|31|74;Gabriel Mec|ATA|22|71;André Henrique|ATA|24|71`,
+Marlon|LAT|31|74;Caio Paulista|LAT|28|73;Marcos Rocha|LAT|37|72;João Pedro|LAT|24|72;Viery|LAT|21|68;
+Mathias Villasanti|VOL|29|76;Juan Nardoni|VOL|24|75;Dodi|VOL|31|73;Erick Noriega|VOL|24|73;Leonel Pérez|VOL|22|69;
+Arthur Melo|MEI|29|78;Willian|MEI|31|76;Miguel Monsalve|MEI|23|73;Filip Krovinović|MEI|30|73;Riquelme Freitas|MEI|22|70;Tiaguinho|MEI|21|68;
+Cristian Pavón|PON|30|76;Francis Amuzu|PON|27|74;José Enamorado|PON|27|72;Zortéa|PON|26|72;
+Tetê|ATA|26|78;Martin Braithwaite|ATA|35|76;Carlos Vinícius|ATA|31|74;Jovane Cabral|ATA|29|74;Gabriel Mec|ATA|22|71;André Henrique|ATA|24|71;Matheus Nascimento|ATA|22|71`,
 
 int:`Sergio Rochet|GOL|33|77;Anthoni|GOL|24|73;Kauan Jesus|GOL|21|66;
 Guillermo Maripán|ZAG|32|78;Félix Torres|ZAG|29|75;Victor Gabriel|ZAG|22|72;Clayton Sampaio|ZAG|28|71;Gabriel Mercado|ZAG|39|71;
@@ -1817,17 +1843,17 @@ Alan Patrick|MEI|35|80;Alan Rodríguez|MEI|25|74;Bruno Henrique Pinto|MEI|36|74;
 Johan Carbonero|PON|27|76;Vitinho|PON|28|74;Kayky Chagas|PON|23|73;Gabriel Barros|PON|21|70;
 Alerrandro|ATA|26|76;Antonio Sanabria|ATA|30|75;Leandro Kauã|ATA|21|70;Yago Noal|ATA|20|68`,
 
-bot:`Léo Linck|GOL|24|73;Neto|GOL|23|70;Raúl|GOL|30|72;
-Bastos|ZAG|31|76;Alexander Barboza|ZAG|31|77;Kaio Pantaleão|ZAG|25|73;David Ricardo|ZAG|24|73;Philipe Sampaio|ZAG|31|72;Marçal|ZAG|37|71;
-Alex Telles|LAT|33|77;Mateo Ponte|LAT|23|74;Cuiabano|LAT|24|75;Vitinho Silva|LAT|26|73;
-Danilo Barbosa|VOL|27|76;Allan Gomes|VOL|29|75;Marlon Freitas|VOL|31|74;Newton|VOL|23|71;
+bot:`Léo Linck|GOL|24|73;Raúl|GOL|30|72;Neto|GOL|23|70;
+Bastos|ZAG|31|76;Nahuel Ferraresi|ZAG|27|76;Kaio Pantaleão|ZAG|25|73;David Ricardo|ZAG|24|73;Philipe Sampaio|ZAG|31|72;Marçal|ZAG|37|71;Riquelme|ZAG|25|71;
+Alex Telles|LAT|33|77;Mateo Ponte|LAT|23|74;Vitinho Silva|LAT|26|73;
+Danilo Barbosa|VOL|27|76;Allan Gomes|VOL|29|75;
 Santiago Rodríguez|MEI|26|77;Álvaro Montoro|MEI|20|74;Jordan Barrera|MEI|21|72;
-Jefferson Savarino|PON|29|78;Artur|PON|28|76;Jeffinho|PON|26|73;Nathan Fernandes|PON|21|72;Matheus Martins|PON|23|73;
+Artur|PON|28|76;Jeffinho|PON|26|73;Matheus Martins|PON|23|73;Nathan Fernandes|PON|21|72;
 Arthur Cabral|ATA|28|77;Joaquín Correa|ATA|32|76;Gonzalo Mastriani|ATA|33|74;Chris Ramos|ATA|32|73`,
 
-bah:`Ronaldo César|GOL|32|76;Guido Herrera|GOL|33|73;Léo Vieira|GOL|24|69;
+bah:`Ronaldo César|GOL|32|76;João Paulo|GOL|30|74;Guido Herrera|GOL|33|73;Léo Vieira|GOL|24|69;
 Kanu|ZAG|29|74;Santiago Ramos Mingo|ZAG|24|73;David Duarte|ZAG|31|73;Marcos Victor|ZAG|25|71;Fredi Gomes|ZAG|22|68;
-Luciano Juba|LAT|27|76;Luiz Otávio Rocha|LAT|22|70;Román Gómez|LAT|24|72;José Guilherme|LAT|21|69;Marco Moreno|LAT|26|71;
+Luciano Juba|LAT|27|76;Román Gómez|LAT|24|72;Marco Moreno|LAT|26|71;Luiz Otávio Rocha|LAT|22|70;José Guilherme|LAT|21|69;
 Caio Alexandre|VOL|27|76;Jean Lucas|VOL|28|75;Nicolás Acevedo|VOL|27|74;Erick Pires|VOL|30|73;
 Everton Ribeiro|MEI|37|76;Rodrigo Nestor|MEI|26|74;Michel Araújo|MEI|29|74;Vitinho Lima|MEI|23|70;
 Erick Pulga|PON|25|76;Cristian Olivera|PON|24|74;Ademir|PON|31|74;Dell|PON|21|70;
@@ -1835,59 +1861,59 @@ Willian José|ATA|35|76;Alejo Véliz|ATA|23|74;Everaldo|ATA|32|72;Ruan Pablo|ATA
 
 vit:`Lucas Arcanjo|GOL|28|74;Gabriel Vasconcelos|GOL|24|70;Alexandre Fintelman|GOL|25|67;
 Lucas Halter|ZAG|26|72;Neris|ZAG|30|71;Zé Marcos|ZAG|27|71;Raúl Cáceres|ZAG|30|71;Pedro Henrique Pinheiro de Jesus|ZAG|21|66;
-Claudinho|LAT|31|71;Jamerson|LAT|29|70;Edu|LAT|21|67;Felipe Vieira|LAT|24|69;
-Gabriel Baralhas|VOL|28|72;Willian Oliveira|VOL|33|71;Ronald|VOL|25|71;Ricardo Ryller|VOL|30|70;Lucas Lohan dos Santos|VOL|21|66;
+Claudinho|LAT|31|71;Jamerson|LAT|29|70;Felipe Vieira|LAT|24|69;Edu|LAT|21|67;
+Walace|VOL|31|76;Gabriel Baralhas|VOL|28|72;Ronald|VOL|25|71;Ricardo Ryller|VOL|30|70;Lucas Lohan dos Santos|VOL|21|66;
 Matheus Trindade|MEI|27|73;Pepê|MEI|28|72;Daniel Júnior|MEI|24|72;Rúben Rodrigues|MEI|30|71;Maykon Jesus|MEI|22|68;
-Osvaldo|PON|38|69;Lucas Braga|PON|29|70;Léo Naldi|PON|24|71;Erick Marcus|PON|23|69;
-Renato Kayzer|ATA|30|73;Renzo López|ATA|31|71;Carlinhos|ATA|29|72;Fabrício Santos|ATA|22|68`,
+Léo Naldi|PON|24|71;Lucas Braga|PON|29|70;Osvaldo|PON|38|69;Erick Marcus|PON|23|69;
+Renato Kayzer|ATA|30|73;Carlinhos|ATA|29|72;Renzo López|ATA|31|71;Fabrício Santos|ATA|22|68`,
 
 cap:`Mycael|GOL|23|73;Santos|GOL|36|71;Matheus Soares|GOL|22|66;
 Carlos Terán|ZAG|25|72;Léo|ZAG|29|71;Dantas|ZAG|24|71;Arthur Dias|ZAG|22|69;Leonardo Derik|ZAG|21|67;
 Lucas Esquivel|LAT|27|72;Gilberto|LAT|32|72;Juan Felipe Aguirre|LAT|27|72;Gastón Benavídez|LAT|29|71;Gilberto Junior|LAT|21|67;
 Juan Portilla|VOL|29|73;Felipinho|VOL|25|71;Isaac|VOL|24|70;Alejandro García|VOL|23|69;
-Bruno Zapelli|MEI|24|75;Luiz Gustavo Nunes|MEI|27|73;Jádson|MEI|22|70;João Cruz|MEI|21|68;
+Bruno Zapelli|MEI|24|75;Luiz Gustavo|MEI|27|73;Jádson|MEI|22|70;João Cruz|MEI|21|68;
 Steven Mendoza|PON|33|73;Kerwin Vargas|PON|23|73;Dudu Vieira|PON|21|69;Chiqueti|PON|24|69;
 Kevin Viveros|ATA|24|75;Leozinho|ATA|22|70;Jorge Rivaldo|ATA|21|69;Renan Peixoto|ATA|23|69`,
 
 cfc:`Pedro Morisco|GOL|24|71;Keiller|GOL|28|71;Pedro Rangel|GOL|29|70;
 Maicon|ZAG|33|70;Rodrigo Moledo|ZAG|38|70;Bruno Melo|ZAG|33|70;Tiago Cóser|ZAG|23|68;Jacy Maranhão|ZAG|24|68;
-João Pedro Chermont|LAT|24|70;Felipe Jonatan|LAT|29|71;Tinga|LAT|33|69;João Almeida|LAT|21|66;
-Josué|VOL|31|71;Thiago Santos|VOL|36|70;Sebastián Gómez|VOL|29|71;Gustavo|VOL|23|68;
+Felipe Jonatan|LAT|29|71;João Pedro Chermont|LAT|24|70;Tinga|LAT|33|69;João Almeida|LAT|21|66;
+Josué|VOL|31|71;Sebastián Gómez|VOL|29|71;Willian Oliveira|VOL|33|71;Thiago Santos|VOL|36|70;Gustavo|VOL|23|68;
 Fernando Sobral|MEI|30|71;Joaquín Lavega|MEI|24|71;Vini Paulista|MEI|24|69;Vitor Gonçalves Tissi|MEI|21|66;
-Breno Lopes|PON|30|72;Lucas Ronier|PON|23|70;Brian Ocampo|PON|27|72;Keno|PON|37|71;
+Breno Lopes|PON|30|72;Brian Ocampo|PON|27|72;Keno|PON|37|71;Lucas Ronier|PON|23|70;
 Rodrigo Rodrigues|ATA|31|71;Pedro Rocha|ATA|31|70;Renato Marques|ATA|24|70;Fabinho|ATA|29|69`,
 
 bra:`Cleiton|GOL|28|76;Tiago Volpi|GOL|35|74;Gustavo Reis|GOL|23|68;
 Pedro Henrique|ZAG|30|73;Eduardo Santos|ZAG|29|72;Guzmán Rodríguez|ZAG|25|72;Alix Vinicius|ZAG|26|70;Gustavo Marques|ZAG|22|69;
 Vanderlan|LAT|24|74;Juninho Capixaba|LAT|29|72;Agustin Sant Anna|LAT|26|72;José Andrés Hurtado|LAT|24|70;
 Jadsom|VOL|27|72;Matheus Fernandes|VOL|28|72;Ignacio Sosa|VOL|26|72;Eric Ramires|VOL|29|71;
-Lucas Barbosa|MEI|25|73;Rodrigo Ferreira|MEI|22|72;Ignacio Laquintana|MEI|29|73;Gabriel Girotto|MEI|22|69;Davi Gomes|MEI|20|68;
+Lucas Barbosa|MEI|25|73;Rodrigo Ferreira|MEI|22|72;Rodriguinho|MEI|27|71;Gabriel Girotto|MEI|22|69;Davi Gomes|MEI|20|68;
 Henry Mosquera|PON|24|73;Vinicinho|PON|22|72;Bruno Praxedes|PON|27|71;Kawê|PON|20|68;
-Isidro Pitta|ATA|26|75;Eduardo Sasha|ATA|33|71;José Herrera|ATA|25|72;Gabriel Novaes|ATA|25|70;Fernando Borges|ATA|22|69`,
+Isidro Pitta|ATA|26|75;José Herrera|ATA|25|72;Eduardo Sasha|ATA|33|71;Gabriel Novaes|ATA|25|70;Fernando Borges|ATA|22|69`,
 
 mir:`Walter|GOL|29|71;Alex Muralha|GOL|36|70;Thomazella|GOL|30|68;
-David Braz|ZAG|38|70;João Vinícius|ZAG|29|70;Luiz Otávio|ZAG|31|70;Jemmes|ZAG|22|68;Wesley Santos|ZAG|23|67;
+David Braz|ZAG|38|70;João Vinícius|ZAG|29|70;Luiz Otávio|ZAG|31|70;Willian Machado|ZAG|27|69;Wesley Santos|ZAG|23|67;
 Reinaldo|LAT|36|72;Lucas Ramon|LAT|29|70;Daniel Borges|LAT|33|69;Leonan|LAT|28|69;
-Neto Moura|VOL|29|71;Yago Felipe|VOL|31|71;Matheus Sales|VOL|30|69;Zé Vitor|VOL|22|66;
-Danielzinho|MEI|30|73;Chico|MEI|25|71;Matheus Bianqui|MEI|27|70;José Aldo|MEI|23|68;
-Alesson|PON|24|72;Negueba|PON|33|70;Edson Carioca|PON|26|69;Luiz Filipe|PON|23|68;Roni|PON|28|70;
-Carlos Eduardo|ATA|27|71;Léo Gamalho|ATA|39|69;Fabrício Daniel|ATA|27|70;Rafael Silva|ATA|31|69;Cristian Renato|ATA|24|68`,
+Neto Moura|VOL|29|71;Yago Felipe|VOL|31|71;Matheus Sales|VOL|30|69;Japa|VOL|22|69;Zé Vitor|VOL|22|66;
+Eduardo|MEI|29|75;Danielzinho|MEI|30|73;Chico|MEI|25|71;Matheus Bianqui|MEI|27|70;José Aldo|MEI|23|68;Wallisson|MEI|24|68;
+Alesson|PON|24|72;Negueba|PON|33|70;Roni|PON|28|70;Edson Carioca|PON|26|69;Luiz Filipe|PON|23|68;
+Carlos Eduardo|ATA|27|71;Fabrício Daniel|ATA|27|70;Léo Gamalho|ATA|39|69;Rafael Silva|ATA|31|69;Cristian Renato|ATA|24|68;Bruno Santos|ATA|24|66`,
 
 rem:`Marcelo Rangel|GOL|32|71;Ivan|GOL|29|71;Ygor Vinhas|GOL|27|69;
-Marllon|ZAG|33|70;Zé Ivaldo|ZAG|28|70;Matheus Felipe|ZAG|27|69;Duplexe Tchamba|ZAG|25|68;Caio Pereira|ZAG|22|66;
-João Lucas|LAT|28|69;Mayk|LAT|24|68;Matheus Alexandre|LAT|27|69;Marcelinho|LAT|22|66;Marlon Lopes|LAT|23|67;
-Zé Welison|VOL|30|69;Leonel Picco|VOL|27|69;Edson Fernando|VOL|27|68;Franco Catarozzi|VOL|24|68;
-Jáderson|MEI|31|70;Vitor Bueno|MEI|31|71;Patrick Fabiano|MEI|30|69;David Braga|MEI|23|67;Zé Ricardo|MEI|24|67;
-Yago Pikachu|PON|34|71;Antonio Galeano|PON|26|69;Jajá|PON|27|70;
-Alef Manga|ATA|31|70;Gabriel Poveda|ATA|29|69;Gabriel Taliari|ATA|32|68;Eduardo Melo|ATA|21|66;Tico|ATA|23|66`,
+Cristian Tassano|ZAG|30|71;Marllon|ZAG|33|70;Zé Ivaldo|ZAG|28|70;Léo Andrade|ZAG|26|69;Caio Pereira|ZAG|22|66;
+João Lucas|LAT|28|69;Matheus Alexandre|LAT|27|69;Mayk|LAT|24|68;Marcelinho|LAT|22|66;
+Zé Welison|VOL|30|69;Edson Fernando|VOL|27|68;
+Vitor Bueno|MEI|31|71;Jáderson|MEI|31|70;Patrick Fabiano|MEI|30|69;David Braga|MEI|23|67;Zé Ricardo|MEI|24|67;
+Yago Pikachu|PON|34|71;Antonio Galeano|PON|26|69;
+Alef Manga|ATA|31|70;Gabriel Poveda|ATA|29|69;Eduardo Melo|ATA|21|66;Tico|ATA|23|66`,
 
 cha:`Anderson|GOL|29|69;Rafael Santos|GOL|26|67;Gabriel Werner|GOL|22|64;
-Rafael Thyere|ZAG|32|70;Fernando|ZAG|29|67;João Vitor Ramos|ZAG|27|68;Victor Caetano|ZAG|24|66;Luciano Neves|ZAG|22|64;
+Rafael Thyere|ZAG|32|70;João Vitor Ramos|ZAG|27|68;Fernando|ZAG|29|67;Victor Caetano|ZAG|24|66;Luciano Neves|ZAG|22|64;Doma|ZAG|25|64;Kauan|ZAG|23|64;
 Bruno Pacheco|LAT|34|68;Heitor|LAT|28|67;Bruno Tubarão|LAT|25|67;Mancha|LAT|22|64;
-Max|VOL|26|67;Vinicius Balieiro|VOL|27|68;Rafael Carvalheira|VOL|26|67;Miguel Carvalho|VOL|22|64;
+Vinicius Balieiro|VOL|27|68;Max|VOL|26|67;Rafael Carvalheira|VOL|26|67;David|VOL|26|67;Rosivan|VOL|27|67;Miguel Carvalho|VOL|22|64;
 Camilo|MEI|38|69;Yago Souza|MEI|31|69;Kevin Ramírez|MEI|27|67;Robert Santos|MEI|24|66;Bruno Matias|MEI|23|65;
 Ênio|PON|26|68;Dylan Borrero|PON|24|68;Marcinho|PON|30|67;Everton|PON|25|66;
-Yannick Bolasie|ATA|36|70;Maurício Garcez|ATA|30|67;Giovanni Augusto|ATA|36|66;Neto Pessoa|ATA|29|66;Franco Rossi|ATA|27|67`
+Yannick Bolasie|ATA|36|70;Maurício Garcez|ATA|30|67;Franco Rossi|ATA|27|67;Rubens|ATA|24|67;Giovanni Augusto|ATA|36|66;Neto Pessoa|ATA|29|66`
 };
 
 /* ---------- as cinco grandes ligas da Europa ---------- */
@@ -2275,7 +2301,9 @@ function calibrarPelaTabela(L2){
 function metaDiretoriaReal(c){
   // na Série B a cobrança é uma só: subir
   if(c && typeof divisaoDe==='function' && divisaoDe(c.id)==='B'){
-    const meta = (c.niv||62)>=66 ? 2 : (c.niv||62)>=62 ? 4 : 8;
+    // na Série B sobem os 4 primeiros: a cobrança é o acesso, não o título.
+    // Pedir 2º lugar para quem acabou de cair era desproporcional.
+    const meta = (c.niv||62)>=66 ? 4 : (c.niv||62)>=62 ? 6 : 9;
     return {meta, paciencia:100, avisos:0, serieB:true};
   }
   const pos = c && c.posReal;
@@ -2292,10 +2320,147 @@ function render(){
   if(L && typeof calibrarPelaTabela==='function') calibrarPelaTabela(L);
   return renderBase();
 }
+/* ===== 02-atributos =====
+   Cada jogador tem qualidades próprias, no espírito do Brasfoot/FM:
+   velocidade, finalização, passe, drible, marcação, físico — e, para o
+   goleiro, o "goleiro" (reflexo + posicionamento). Elas nascem da força (ovr),
+   da posição e de um sorteio fixo por jogador (igual em todo aparelho), e
+   evoluem com a idade e o treino. O motor usa a mistura de força e atributos. */
+'use strict';
+
+const ATRIBS = ['vel','fin','pas','dri','mar','fis','gol'];
+const ATRIB_NOME = {vel:'Velocidade', fin:'Finalização', pas:'Passe', dri:'Drible', mar:'Marcação', fis:'Físico', gol:'Goleiro'};
+
+// deslocamento em relação à força, por posição
+const PERFIL_POS = {
+  GOL: {vel:-16, fin:-30, pas:-12, dri:-28, mar:-18, fis:-4,  gol:+3},
+  ZAG: {vel:-5,  fin:-16, pas:-4,  dri:-9,  mar:+8,  fis:+6,  gol:-40},
+  LAT: {vel:+6,  fin:-11, pas:+1,  dri:-1,  mar:+3,  fis:+3,  gol:-40},
+  VOL: {vel:-4,  fin:-10, pas:+3,  dri:-4,  mar:+6,  fis:+5,  gol:-40},
+  MEI: {vel:-1,  fin:-2,  pas:+8,  dri:+4,  mar:-7,  fis:-2,  gol:-40},
+  PON: {vel:+8,  fin:+1,  pas:0,   dri:+6,  mar:-13, fis:-3,  gol:-40},
+  ATA: {vel:+4,  fin:+8,  pas:-4,  dri:+2,  mar:-15, fis:0,   gol:-40}
+};
+
+// o que o craque tem de especial
+const BONUS_ESTRELA = { veloz:{vel:6,dri:2}, faro:{fin:6}, maestro:{pas:6,dri:2}, muralha:{mar:6,fis:2}, falta:{fin:3,pas:3}, paredao:{gol:5} };
+
+// quais atributos contam para cada papel em campo (pesos)
+const PESO_PAPEL = {
+  GOL: {gol:.75, fis:.10, pas:.15},
+  ZAG: {mar:.50, fis:.25, vel:.10, pas:.15},
+  LAT: {vel:.30, mar:.30, pas:.20, fis:.20},
+  VOL: {mar:.35, pas:.30, fis:.25, dri:.10},
+  MEI: {pas:.40, dri:.25, fin:.15, vel:.10, fis:.10},
+  PON: {vel:.35, dri:.30, fin:.20, pas:.15},
+  ATA: {fin:.45, vel:.20, dri:.15, fis:.20}
+};
+
+function garanteAtributos(p, seed){
+  if(p.at && ATRIBS.every(k=>typeof p.at[k]==='number')) return p.at;
+  const r = rng(String(seed||'x')+'#at#'+p.id);
+  const perfil = PERFIL_POS[p.pos] || PERFIL_POS.MEI;
+  const bonus = (p.estrela && BONUS_ESTRELA[p.estrela]) || {};
+  const at={};
+  ATRIBS.forEach(k=>{
+    const ruido = Math.round((r()+r()-1)*6);              // -6..+6, concentrado no meio
+    at[k] = clamp(Math.round(p.ovr + (perfil[k]||0) + ruido + (bonus[k]||0)), 25, 99);
+  });
+  // mantém a média dos atributos que importam para a posição colada na força
+  const peso = PESO_PAPEL[p.pos] || PESO_PAPEL.MEI;
+  const media = Object.keys(peso).reduce((s,k)=>s+at[k]*peso[k],0);
+  const corr = Math.round(p.ovr - media);
+  Object.keys(peso).forEach(k=>{ at[k]=clamp(at[k]+corr, 25, 99); });
+  p.at = at;
+  return at;
+}
+
+function garanteAtributosDe(L2){
+  if(!L2 || !L2.squads) return;
+  Object.keys(L2.squads).forEach(cid=>(L2.squads[cid]||[]).forEach(p=>garanteAtributos(p, L2.seed)));
+}
+
+// força efetiva do jogador num papel: metade a força geral, metade os atributos que aquele papel pede
+function forcaNoPapel(p, slot){
+  const at = p.at || garanteAtributos(p, (typeof L!=='undefined'&&L)?L.seed:'x');
+  const peso = PESO_PAPEL[slot] || PESO_PAPEL[p.pos] || PESO_PAPEL.MEI;
+  const tot = Object.keys(peso).reduce((s,k)=>s+peso[k],0)||1;
+  const v = Object.keys(peso).reduce((s,k)=>s+at[k]*peso[k],0)/tot;
+  return p.ovr*0.5 + v*0.5;
+}
+
+// quando a força muda (evolução ou queda), os atributos acompanham — os da posição um pouco mais
+function evoluirAtributos(p, delta, foco){
+  const at = p.at; if(!at || !delta) return;
+  const peso = PESO_PAPEL[p.pos] || PESO_PAPEL.MEI;
+  ATRIBS.forEach(k=>{
+    if(k==='gol' && p.pos!=='GOL') return;
+    let f = (peso[k] ? 1.2 : 0.6);
+    if(foco && foco===k) f += 0.9;
+    at[k] = clamp(at[k] + delta*f, 25, 99);
+  });
+}
+
+// os três atributos que definem o jogador (para a lista e a ficha)
+function atributosChave(p){
+  const at = p.at || garanteAtributos(p, (typeof L!=='undefined'&&L)?L.seed:'x');
+  if(p.pos==='GOL') return [['gol',at.gol],['fis',at.fis],['pas',at.pas]];
+  const peso = PESO_PAPEL[p.pos] || PESO_PAPEL.MEI;
+  return Object.keys(peso).sort((a,b)=>peso[b]-peso[a]).slice(0,3).map(k=>[k,at[k]]);
+}
+
+// cores fixas: o acento do time é colorido e confundia a leitura
+function corAtrib(v){ return v>=80?'var(--ok)':v>=68?'var(--ink)':v>=56?'var(--warn)':'var(--danger)'; }
+
+function atributosHTML(p){
+  const at = p.at || garanteAtributos(p, (typeof L!=='undefined'&&L)?L.seed:'x');
+  const lista = p.pos==='GOL' ? ['gol','fis','pas','vel','mar','dri'] : ['vel','fin','pas','dri','mar','fis'];
+  const peso = PESO_PAPEL[p.pos] || PESO_PAPEL.MEI;
+  return `<div class="atr-grid">${lista.map(k=>`<div class="atr ${peso[k]?'chave':''}">
+      <span class="atr-n">${ATRIB_NOME[k]}</span>
+      <span class="atr-b"><i style="width:${Math.round(at[k])}%;background:${corAtrib(at[k])}"></i></span>
+      <b style="color:${corAtrib(at[k])}">${Math.round(at[k])}</b></div>`).join('')}</div>`;
+}
+
+/* ---------- evolução semanal (uma regra só para carreira e liga) ---------- */
+
+const TREINO_FOCO = {finalizacao:'fin', fisico:'fis'};
+function focoDoTreino(treino, p){
+  if(treino==='tatico') return (p.pos==='ZAG'||p.pos==='LAT'||p.pos==='VOL') ? 'mar' : 'pas';
+  return TREINO_FOCO[treino] || null;
+}
+
+// aplica o ganho/queda da semana e faz os atributos e o histórico acompanharem
+function aplicarEvolucao(p, ganho, treino, slotAtual, L2){
+  const antes = p.ovr;
+  p.ovrF = (p.ovrF||p.ovr) + ganho;
+  p.ovr = clamp(Math.round(p.ovrF), 45, 92);
+  p.valor = valorDeMercado(p.ovr, p.idade);
+  if(p.ovr0===undefined) p.ovr0 = p.ovr;
+  const delta = p.ovr - antes;
+  // atributos: acompanham a força; o foco do treino puxa um pouco mais mesmo sem mudar a força
+  if(p.at){
+    if(delta) evoluirAtributos(p, delta, focoDoTreino(treino, p));
+    else if(treino && treino!=='equilibrado' && (p.at.__f=(p.at.__f||0)+1)%6===0){
+      const k=focoDoTreino(treino, p); if(k) p.at[k]=clamp(p.at[k]+1, 25, Math.min(99, p.ovr+12));
+    }
+  }
+  if(delta){
+    p.h = (p.h||[]).concat([[slotAtual||0, p.ovr]]).slice(-16);   // histórico curto: [semana, força]
+    if(L2 && L2.meuClube && (p._cid===L2.meuClube)) p._mudou = delta;
+  }
+  return delta;
+}
+
+function noticiaEvolucao(L2, p, delta){
+  if(!L2 || !L2.noticias) return;
+  const txt = delta>0 ? `${p.nome} evoluiu: força ${p.ovr-delta} → ${p.ovr}.` : `${p.nome} caiu de rendimento: força ${p.ovr-delta} → ${p.ovr}.`;
+  L2.noticias.unshift({t: delta>0?'good':'bad', txt});
+}
 /* ===== 02-motor ===== */
 'use strict';
 
-const K = { SHOT:0.255, CONV:0.090, HOME:1.090, EXP_S:1.14, EXP_C:0.92,
+const K = { SHOT:0.254, CONV:0.0890, HOME:1.094, TALENTO:1.28, EXP_S:1.14, EXP_C:0.92,
             FOUL:0.132, PEN:0.018, DUR:90 };
 
 const MENT = {
@@ -2326,7 +2491,8 @@ function escalarAuto(elenco, formacao){
     let melhor=null, melhorV=-1;
     livres.forEach(p=>{
       if(tit.includes(p.id)) return;
-      const v = p.ovr*fit(p.pos,slot)*(0.92+0.08*p.forma/100)*(0.74+0.26*clamp(p.energia,0,100)/100);
+      const base = (typeof forcaNoPapel==='function') ? forcaNoPapel(p, slot) : p.ovr;
+      const v = base*fit(p.pos,slot)*(0.92+0.08*p.forma/100)*(0.74+0.26*clamp(p.energia,0,100)/100);
       if(v>melhorV){melhorV=v;melhor=p;}
     });
     if(melhor) tit.push(melhor.id);
@@ -2341,7 +2507,9 @@ function forcasBase(S){
   S.emCampo.forEach(u=>{
     if(u.fora) return;
     const p=u.p, f=fit(p.pos,u.slot);
-    const eff = p.ovr*f*(.70+.30*clamp(u.energia,0,100)/100)*(.92+.16*p.forma/100)*(.94+.12*p.moral/100);
+    // metade a força geral, metade as qualidades que o papel pede (velocidade, marcação, passe…)
+    const base = (typeof forcaNoPapel==='function') ? forcaNoPapel(p, u.slot) : p.ovr;
+    const eff = base*f*(.70+.30*clamp(u.energia,0,100)/100)*(.92+.16*p.forma/100)*(.94+.12*p.moral/100);
     if(u.slot==='GOL') gk=eff;
     else if(u.slot==='ZAG'||u.slot==='LAT') def.push(eff);
     else if(u.slot==='ATA') atk.push(eff);
@@ -2361,6 +2529,17 @@ function forcasBase(S){
   M *= (0.94 + 0.02*nMid);
   const nDef = slots.filter(s=>s==='ZAG'||s==='LAT').length;
   D *= (0.95 + 0.0165*nDef*2);
+  /* Talento rende mais que proporcional. Antes a força era linear no overall:
+     um elenco de 80 valia só 14% mais que um de 70, e o melhor time do país
+     terminava em 12º numa temporada em cada seis. No futebol de verdade a
+     diferença entre um grande e um pequeno é bem maior que 14%.
+     Aqui a distância para a média da liga é esticada. Um time médio não muda —
+     por isso o ritmo de gols e o empate ficam onde estavam — mas o grande fica
+     mais grande e o pequeno, mais pequeno. Esticar com potência, em vez disso,
+     inflava a defesa dos dois lados e enchia o campeonato de 0 a 0. */
+  const G = K.TALENTO, PIVO = 72;
+  const talento = v => PIVO + (v - PIVO) * G;
+  D = talento(D); M = talento(M); A = talento(A);
   return {
     def: D*m.def*pr.def*penalN,
     mid: M*m.mid*pr.mid*es.mid*penalN,
@@ -2389,11 +2568,17 @@ function ev(M, t, side, txt, cls){
 
 function nome(u){return u.p.nome;}
 
+/* Quem finaliza. Antes a posição mandava quase sozinha (expoente 2,2 no overall),
+   e por isso um atacante de 77 fazia mais gol que um ponta de 80 — medido: a faixa
+   76-78 marcava 0,152 por jogo contra 0,135 da faixa 79-81, invertido. Agora conta
+   a finalização do jogador, e conta forte. */
 function escolheAtacante(S){
   const cands = S.emCampo.filter(u=>!u.fora && u.slot!=='GOL');
   const peso = cands.map(u=>{
     const b = u.slot==='ATA'?10 : u.slot==='PON'?6 : u.slot==='MEI'?5.2 : u.slot==='VOL'?1.8 : 1;
-    return b*Math.pow(u.p.ovr/62, 2.2);
+    const p = u.p;
+    const q = (p.at && typeof p.at.fin==='number') ? p.ovr*0.45 + p.at.fin*0.55 : p.ovr;
+    return b*Math.pow(Math.max(40,q)/62, 4.2);
   });
   const tot=peso.reduce((a,b)=>a+b,0); let r=rnd()*tot;
   for(let i=0;i<cands.length;i++){ r-=peso[i]; if(r<=0) return cands[i]; }
@@ -3068,6 +3253,7 @@ function ajustarFinancasIniciais(L){
 function prepararElencosIniciais(L){
   if(typeof calibrarPelaTabela==='function') calibrarPelaTabela(L);   // sempre antes da 1ª rodada (determinismo)
   if(typeof marcarEstrelas==='function') marcarEstrelas(L);
+  if(typeof garanteAtributosDe==='function') garanteAtributosDe(L);   // qualidades de cada jogador
   ajustarFinancasIniciais(L);
 }
 
@@ -3684,6 +3870,7 @@ function resolverConfrontoBase(L, comp, fase, m){
     if(cl){ cl.titulos=cl.titulos||[]; cl.titulos.push({comp:comp.nome, ano:L.temporada}); }
     if(m.venc===L.meuClube){
       L.titulos=L.titulos||[]; L.titulos.push({comp:comp.nome, ano:L.temporada});
+      if(typeof repGanhouTitulo==='function') repGanhouTitulo(comp.nome);
       L.noticias.unshift({t:'led', txt:`🏆 ${clube(L.meuClube).nome} campeão — ${comp.nome} ${L.temporada}!`});
     } else {
       L.noticias.unshift({t:'', txt:`${clube(m.venc).nome} campeão — ${comp.nome} ${L.temporada}.`});
@@ -3753,7 +3940,11 @@ function fecharTemporadaNovaBase(L){
     L.noticias.unshift({t:'', txt:`${clube(tbB[0].id).nome} é campeão da Série B e sobe para a elite.`});
   }
   const campeao=clube(tb[0].id);
-  if(tb[0].id===L.meuClube){ L.titulos=L.titulos||[]; L.titulos.push({comp:'Brasileirão Série A',ano:L.temporada}); }
+  if(tb[0].id===L.meuClube){ L.titulos=L.titulos||[]; L.titulos.push({comp:'Brasileirão Série A',ano:L.temporada});
+    if(typeof repGanhouTitulo==='function') repGanhouTitulo('Brasileirão Série A'); }
+  // a temporada fecha o balanço do técnico também
+  if(typeof repFimDeTemporada==='function' && L.modo!=='amigos')
+    repFimDeTemporada(pos||20, L.diretoria?L.diretoria.meta:12);
   L.historico.unshift({ano:L.temporada, campeao:campeao.nome, minhaPos:pos||20, pts:minha.p||0,
     div:(divisaoDe(L.meuClube,L)||'A'),
     titulos:(L.titulos||[]).filter(t=>t.ano===L.temporada).map(t=>t.comp)});
@@ -3840,11 +4031,9 @@ function aplicarSemana(L){
       const SEM=49, gol=p.pos==='GOL';
       const limiar = gol?33:30, taxa = gol?0.22:0.36, teto = gol?3.0:4.0;
       if(p.idade>=limiar) ganho -= Math.min(teto, taxa*(p.idade-limiar+1))/SEM;
-      p.ovrF=(p.ovrF||p.ovr)+ganho;
-      p.ovr=clamp(Math.round(p.ovrF),45,92);
-      p.valor=valorDeMercado(p.ovr,p.idade);
+      const d=aplicarEvolucao(p, ganho, treino, L.slot);
+      if(d && meu) noticiaEvolucao(L, p, d);
       if(p.jogos===0) p.moral=clamp(p.moral-0.8,5,100);
-      if(p.ovr0===undefined) p.ovr0=p.ovr;
     });
   });
   if(L.slot%3===0) mercadoIA();
@@ -3885,6 +4074,9 @@ function fecharSlot(L2){
   try{
     if(L && L.modo!=='amigos' && !L.demitido && typeof avaliarDiretoriaNova==='function')
       avaliarDiretoriaNova();
+    // outro clube pode bater na sua porta no meio da temporada
+    if(L && L.modo!=='amigos' && !L.demitido && !L.semClube && typeof sondagemDaSemana==='function')
+      sondagemDaSemana();
   }catch(e){}
   return r;
 }
@@ -3899,6 +4091,7 @@ function demissaoNoFimDaTemporada(pos){
 function demitido(){
   if(L.demitido) return;
   const tb=tabela(L), pos=tb.findIndex(x=>x.id===L.meuClube)+1;
+  if(typeof repDemitido==='function') repDemitido();
   L.demitido={de:L.meuClube, pos, temporada:L.temporada, slot:L.slot};
   L.noticias.unshift({t:'bad', txt:`O ${clube(L.meuClube).nome} demitiu você. ${pos}º lugar, meta era ${L.diretoria?ordinal(L.diretoria.meta):'—'}.`});
   salvar(true);
@@ -3930,6 +4123,8 @@ function clubesQueChamam(){
 
 function telaRecolocacao(){
   if(!L.demitido) return;
+  // a tela nova mostra reputação e as passagens; a antiga fica de reserva
+  if(typeof telaMercadoDeTecnicos==='function') return telaMercadoDeTecnicos();
   const ofertas = clubesQueChamam();
   const antigo = clube(L.demitido.de);
   sheet('Você foi demitido', `
@@ -3948,6 +4143,7 @@ function telaRecolocacao(){
 
 function assumirNovoClube(cid){
   const c = clube(cid); if(!c) return;
+  if(typeof trocarDeClube==='function') return trocarDeClube(cid, false);
   const antes = L.demitido ? L.demitido.de : null;
   L.meuClube = cid;
   L.demitido = null;
@@ -4090,6 +4286,36 @@ function salarioPedido(p, meuClube){
 
 function folhaDe(cid){ return (L.squads[cid]||[]).reduce((s,p)=>s+p.salario,0); }
 
+/* Comprar um craque de 87+ da Europa não é impossível — é um projeto.
+   O clube dele só senta para conversar se o seu já for grande: torcida, estádio,
+   títulos ganhos por você e o continente conquistado. Quanto maior o jogador,
+   mais projeto ele exige. Depois disso ainda tem que pagar caro e caber a folha. */
+function pesoDoProjeto(){
+  const c = clube(L.meuClube) || {};
+  const tit = L.titulos || [];
+  const brasileiros = tit.filter(t=>/Brasileir/i.test(t.comp)).length;
+  const continentais = tit.filter(t=>/Libertadores|Mundial|Sul-Americana/i.test(t.comp)).length;
+  return {
+    torcida: (typeof torcidaDe==='function'?torcidaDe(c):3) - 3,   // −2 a +2
+    estadio: c.estadio>=55000 ? 2 : c.estadio>=42000 ? 1 : 0,
+    brasileiros: brasileiros*1.5,
+    continentais: continentais*3,
+    get total(){ return this.torcida + this.estadio + this.brasileiros + this.continentais; }
+  };
+}
+
+function exigenciaDoCraque(ovr){ return Math.round((ovr-86)*1.8*10)/10; }   // 87 → 1.8 · 91 → 9
+
+function faltaPraSonhar(ovr){
+  const g = pesoDoProjeto(), falta = exigenciaDoCraque(ovr) - g.total;
+  if(falta<=0) return null;
+  const o=[];
+  if(g.continentais===0) o.push('ganhar a Libertadores');
+  if(g.brasileiros===0)  o.push('ser campeão brasileiro');
+  if(g.estadio===0)      o.push('ampliar o estádio');
+  return 'Para um jogador assim, seu clube ainda precisa de história: '+(o.slice(0,2).join(' ou ')||'mais títulos')+'.';
+}
+
 function avaliarProposta(cid, p, oferta, ofSalario){
   const pedido=precoPedido(cid,p);
   const imp=importancia(cid,p);
@@ -4097,9 +4323,13 @@ function avaliarProposta(cid, p, oferta, ofSalario){
   const mesmaPos=el.filter(x=>x.pos===p.pos&&x.id!==p.id).length;
   const euro = ehEuropeu(cid);
   if(el.length<=17) return {ok:false, motivo:'O elenco já está no limite mínimo.'};
-  if(euro && p.ovr>=87) return {ok:false, motivo:'Intocável. O clube nem senta para conversar.'};
+  if(euro && p.ovr>=87){
+    const falta = faltaPraSonhar(p.ovr);
+    if(falta) return {ok:false, motivo:falta};
+  }
   if(mesmaPos<1 && imp===1) return {ok:false, motivo:`É o único ${p.pos} de nível no elenco.`};
-  const exigido = euro ? 1.35 : 1.0;
+  // craque da Europa sai por 50% acima do que pedem; os outros, 35%
+  const exigido = euro ? (p.ovr>=87 ? 1.5 : 1.35) : 1.0;
   const razao=oferta/pedido;
   if(razao>=exigido) return {ok:true};
   if(!euro && razao>=0.82 && rnd()<0.55) return {ok:true};
@@ -4202,6 +4432,8 @@ function fichaJogadorSolo(pid, contexto){
   const media = p.jogos?(p.notaSoma/p.jogos):0;
   sheet(esc(c.nome), `
   ${cardJogador(p,c)}
+  ${typeof atributosHTML==='function'?`<div class="card flat" style="margin-bottom:12px">
+    <div class="eyebrow" style="margin-bottom:7px">Qualidades</div>${atributosHTML(p)}</div>`:''}
   <div class="grid2" style="margin-bottom:12px">
     ${[['Energia',p.energia],['Forma',p.forma],['Moral',p.moral],['Potencial',p.pot]].map(([n,v])=>
       `<div class="card flat" style="padding:9px"><div class="eyebrow">${n}</div>
@@ -4210,7 +4442,7 @@ function fichaJogadorSolo(pid, contexto){
   <div class="card flat" style="margin-bottom:12px">
     ${(()=>{const d=p.ovr-(p.ovr0===undefined?p.ovr:p.ovr0);
       return `<div class="between sm"><span class="mut">Evolução na temporada</span>
-        <span class="mono" style="color:${d>0?'var(--ok)':d<0?'var(--danger)':'inherit'}">${d>0?'+':''}${d}</span></div>`;})()}
+        <span class="mono" style="color:${d>0?'var(--ok)':d<0?'var(--danger)':'inherit'}">${d>0?'+':''}${d}${(p.h&&p.h.length)?' · '+p.h.map(x=>x[1]).join(' → '):''}</span></div>`;})()}
     ${p.temporadas?`<div class="between sm"><span class="mut">Carreira no jogo</span><span class="mono">${p.jogosCarreira||0}J · ${p.golsCarreira||0}G${p.titulos?' · '+p.titulos+'🏆':''}</span></div>`:''}
     <div class="between sm"><span class="mut">Nota média</span><span class="mono">${media?media.toFixed(2):'—'}</span></div>
     <div class="between sm"><span class="mut">Cartões</span><span class="mono">${p.ca}A · ${p.cv}V</span></div>
@@ -4517,6 +4749,8 @@ function fichaAmigos(pid){
   const aberta=janelaAmigos(L);
   sheet(esc(c.nome)+(ehHumano(dono)?' · '+esc(L.managers[dono].nome||'amigo'):''), `
   ${cardJogador(p,c)}
+  ${typeof atributosHTML==='function'?`<div class="card flat" style="margin-bottom:12px">
+    <div class="eyebrow" style="margin-bottom:7px">Qualidades</div>${atributosHTML(p)}</div>`:''}
   <div class="grid2" style="margin-bottom:12px">
     ${[['Energia',p.energia],['Forma',p.forma],['Moral',p.moral],['Potencial',p.pot]].map(([n,v])=>
       `<div class="card flat" style="padding:9px"><div class="eyebrow">${n}</div>
@@ -5570,18 +5804,20 @@ function aplicarSemanaAmigos(){
   // economia: todo clube da liga fatura e paga folha (igual em todos os aparelhos)
   clubesDaLiga().forEach(c=>{ semanaFinanceira(c, jogosEmCasaDoSlot(L, c.id, L.slot)); });
   Object.keys(L.squads).forEach(cid=>{
+    // o treino de cada técnico viaja no código das ordens; quem não mandou treina equilibrado
+    const cl=clube(cid);
+    const treino=(cl && cl.treinoSemana) || 'equilibrado';
+    const meu = cid===L.meuClube;
     L.squads[cid].forEach(p=>{
-      p.energia=clamp(p.energia+recuperaSemana(p, L.treino),0,100);
+      p.energia=clamp(p.energia+recuperaSemana(p, treino),0,100);
       if(p.lesao>0) p.lesao=Math.max(0,p.lesao-1);
       let ganho=0;
-      if(p.ovr<p.pot) ganho=(p.idade<=19?0.185:p.idade<=21?0.155:p.idade<=23?0.115:p.idade<=26?0.058:p.idade<=29?0.028:0.014)*fatorDesempenho(p);
-      const SEM=38, gol=p.pos==='GOL';
+      if(p.ovr<p.pot) ganho=(p.idade<=19?0.185:p.idade<=21?0.155:p.idade<=23?0.115:p.idade<=26?0.058:p.idade<=29?0.028:0.014)*fatorDesempenho(p)*(treino==='tatico'?1.15:1);
+      const SEM=42, gol=p.pos==='GOL';
       const limiar=gol?33:30, taxa=gol?0.22:0.36, teto=gol?3.0:4.0;
       if(p.idade>=limiar) ganho -= Math.min(teto, taxa*(p.idade-limiar+1))/SEM;
-      p.ovrF=(p.ovrF||p.ovr)+ganho;
-      p.ovr=clamp(Math.round(p.ovrF),45,92);
-      p.valor=valorDeMercado(p.ovr,p.idade);
-      if(p.ovr0===undefined) p.ovr0=p.ovr;
+      const d=aplicarEvolucao(p, ganho, treino, L.slot);
+      if(d && meu) noticiaEvolucao(L, p, d);
     });
   });
   if(L.slot%6===0) noticiaRodada(L);
@@ -5753,6 +5989,523 @@ function meuCodigoEntrada(){
     <div class="card flat" style="margin-bottom:10px"><p class="mono" style="font-size:15px;word-break:break-all">${esc(cod)}</p></div>
     <button class="btn pri wide" onclick="copiar(${JSON.stringify(cod)})">Copiar código</button>`);
 }
+/* ===== 06b-lance =====
+   O futebol de botão de verdade.
+
+   O problema da versão anterior era de fundo: cada toque durava 300ms fixos,
+   então um passe de 42 metros viajava a 140 m/s — mais rápido que o olho segue —
+   e a bola cruzava o campo inteiro de um lado ao outro sem motivo. Medido numa
+   partida: velocidade mediana de 62 m/s, pico de 379. Um passe de verdade anda
+   a 18.
+
+   Agora vale o seguinte, e vale para a bola parada e para o lance:
+   1. A bola tem velocidade física. O tempo de cada toque sai da distância.
+   2. Os passes são curtos. A jogada sobe o campo de 10 em 15 metros.
+   3. Quem recebe vai até onde a bola vai. O jogador é preso no ponto de recepção
+      enquanto a bola viaja, e chega junto com ela — é isso que faz parecer passe.
+   4. A jogada progride na direção do gol. Nada de voltar 40 metros sem razão.
+   5. O gol nasce da jogada: o chute sai de onde se chuta, não do meio-campo. */
+'use strict';
+
+// metros por segundo, na escala do campo (100 x 64)
+const VEL_BOLA = {curto:15, passe:19, forte:25, lancamento:23, conducao:6.5,
+                  cruzamento:21, chute:32, recuo:16, saida:22, sobra:12};
+
+function msDaBola(d, tipo, f){
+  const v = VEL_BOLA[tipo] || VEL_BOLA.passe;
+  return Math.max(110, Math.round(d / v * 1000 * (f==null?1:f)));
+}
+
+function dentroDoCampo(p){
+  return {x: clamp(p.x, 2.2, CAMPO_W-2.2), y: clamp(p.y, 3, CAMPO_H-3)};
+}
+
+/* Quem recebe num ponto: o companheiro cuja posição natural é a mais próxima
+   dali. Assim o lateral recebe na lateral e o atacante recebe na área. */
+function receptorNoPonto(S, ponto, usados, semGol){
+  let melhor=null, d0=1e9;
+  S.emCampo.forEach(u=>{
+    if(u.fora) return;
+    if(semGol!==false && u.slot==='GOL') return;
+    if(usados && usados[u.idx]) return;
+    const q=posBase(S, u.idx);
+    const d=Math.hypot(q.x-ponto.x, q.y-ponto.y);
+    if(d<d0){ d0=d; melhor=u; }
+  });
+  return melhor;
+}
+
+// o adversário de linha mais perto de um ponto — quem vai pressionar
+function defensorPerto(O, ponto, usados){
+  let melhor=null, d0=1e9;
+  O.emCampo.forEach(u=>{
+    if(u.fora || u.slot==='GOL') return;
+    if(usados && usados[u.idx]) return;
+    const q=posBase(O, u.idx);
+    const d=Math.hypot(q.x-ponto.x, q.y-ponto.y);
+    if(d<d0){ d0=d; melhor=u; }
+  });
+  return melhor;
+}
+
+/* De onde se finaliza. Um chute de fora sai de 22 a 27 metros; o de dentro da
+   área, de 9 a 16, na diagonal de quem vem de fora. */
+function pontoDeChute(S, estilo){
+  const gol=golDe(S), dir=S.casa?1:-1;
+  if(estilo==='fora'){
+    const dist = 22 + rnd()*6;
+    return dentroDoCampo({x: gol.x - dir*dist, y: CAMPO_H/2 + (rnd()-.5)*20});
+  }
+  if(estilo==='cruz'){   // cabeceio/finalização no segundo pau, coladinho
+    return dentroDoCampo({x: gol.x - dir*(7 + rnd()*5), y: CAMPO_H/2 + (rnd()-.5)*13});
+  }
+  const dist = 9 + rnd()*7;
+  return dentroDoCampo({x: gol.x - dir*dist, y: CAMPO_H/2 + (rnd()-.5)*17});
+}
+
+// o ponto do cruzamento: perto da linha de fundo, na ponta
+function pontoDeCruzamento(S){
+  const gol=golDe(S), dir=S.casa?1:-1;
+  return dentroDoCampo({x: gol.x - dir*(5 + rnd()*6), y: rnd()<.5 ? 5.5 : CAMPO_H-5.5});
+}
+
+/* O caminho da jogada: do lugar onde a bola está até o ponto de finalização,
+   em saltos que cabem num passe. Cada salto ganha um dono. */
+function caminhoAteOAlvo(S, inicio, alvo, orcamento, f){
+  const dir=S.casa?1:-1;
+  const D = Math.hypot(alvo.x-inicio.x, alvo.y-inicio.y);
+  // quantos toques cabem: nem um passe de 40m, nem vinte toquinhos
+  let n = clamp(Math.round(D/13), 1, 5);
+  // nenhum passe pode ser maior que 34m: era isso que fazia a bola atravessar
+  // o campo inteiro de uma vez e o jogo perder o sentido
+  const minimo = Math.max(1, Math.ceil(D/34));
+  n = Math.max(n, minimo);
+  // e o orçamento manda: se não dá tempo, menos toques — mas nunca menos que o mínimo
+  const tempoDe = k => { let t=0, p=inicio;
+    for(let i=1;i<=k;i++){ const q={x:inicio.x+(alvo.x-inicio.x)*i/k, y:inicio.y+(alvo.y-inicio.y)*i/k};
+      t += msDaBola(Math.hypot(q.x-p.x,q.y-p.y), 'passe', f) + 90*(f||1); p=q; }
+    return t; };
+  while(n>minimo && tempoDe(n) > orcamento) n--;
+  const pontos=[];
+  for(let i=1;i<=n;i++){
+    const t=i/n;
+    let p={x: inicio.x+(alvo.x-inicio.x)*t, y: inicio.y+(alvo.y-inicio.y)*t};
+    if(i<n){                                   // desvia um pouco do risco reto
+      p.y += (rnd()-.5)*11;
+      p.x += dir*(rnd()-.3)*3;
+    } else { p={x:alvo.x, y:alvo.y}; }
+    pontos.push(dentroDoCampo(p));
+  }
+  return pontos;
+}
+
+/* ---------- montar o lance ---------- */
+
+function estiloDoLance(S, e){
+  const u = e.i!=null ? S.emCampo.find(z=>z.idx===e.i) : null;
+  const fin = u && typeof atrDe==='function' ? atrDe(u,'fin') : 70;
+  const fis = u && typeof atrDe==='function' ? atrDe(u,'fis') : 70;
+  const r = rnd()*100;
+  if(r < 15 + (fin-70)*0.5) return 'fora';
+  if(r < 42 + (fis-70)*0.5) return 'cruz';
+  return 'dentro';
+}
+
+/* Devolve a lista de passos do lance. Cada passo:
+   {para:{x,y}, tipo, receptor(idx ou null), fase, ms, antes(fn)} */
+function montarLance(S, O, e, orcamento, f){
+  const dir=S.casa?1:-1, gol=golDe(S), lado=ladoDe(S);
+  const inicio = {x:BOLA_POS.x, y:BOLA_POS.y};
+  const passos=[];
+  const usados={};
+  const estilo = (e.t==='gol'||e.t==='defesa'||e.t==='trave'||e.t==='fora'||e.t==='chance')
+    ? estiloDoLance(S, e) : 'dentro';
+
+  // reserva quem finaliza: ele é o dono do último toque antes do chute
+  const fim = e.i!=null ? S.emCampo.find(u=>u.idx===e.i && !u.fora) : null;
+  if(fim) usados[fim.idx]=1;
+
+  const alvoChute = pontoDeChute(S, estilo);
+  const alvoConstru = (estilo==='cruz') ? pontoDeCruzamento(S) : alvoChute;
+
+  // sobra do orçamento para a construção (o chute e o desfecho comem o resto)
+  const custoFim = (estilo==='cruz' ? 900 : 650) * (f||1);
+  const pontos = caminhoAteOAlvo(S, inicio, alvoConstru, Math.max(300, orcamento-custoFim), f);
+
+  pontos.forEach((pt, i)=>{
+    const ultimo = (i===pontos.length-1);
+    const dono = (ultimo && estilo!=='cruz' && fim) ? fim
+               : receptorNoPonto(S, pt, usados);
+    if(dono) usados[dono.idx]=1;
+    const d = Math.hypot(pt.x - (i?pontos[i-1].x:inicio.x), pt.y - (i?pontos[i-1].y:inicio.y));
+    const tipo = d>26 ? 'lancamento' : d>17 ? 'forte' : d>9 ? 'passe' : 'curto';
+    const avanco = (pt.x - (i?pontos[i-1].x:inicio.x))*dir;
+    passos.push({para:pt, tipo, receptor:dono?dono.idx:null, lado,
+      fase: ultimo ? 'area' : (avanco>4 ? 'ataque' : 'normal'),
+      ms: msDaBola(d, tipo, f)});
+  });
+
+  if(estilo==='cruz'){
+    // o cruzamento: bola alta pra área, e quem finaliza aparece lá
+    const d=Math.hypot(alvoChute.x-alvoConstru.x, alvoChute.y-alvoConstru.y);
+    passos.push({para:alvoChute, tipo:'cruzamento', receptor:fim?fim.idx:null, lado,
+      fase:'area', ms: msDaBola(d, 'cruzamento', f), cruzou:true});
+  }
+
+  return {passos, estilo, alvoChute, fim, gol, dir, lado};
+}
+
+/* ---------- tocar o lance ---------- */
+
+let LANCE_MS = {};   // duração real medida do último lance de cada tipo
+
+function animarLanceBase(e){
+  if(!M || !$('campo-svg')) return;
+  if(VEL==='turbo' && e.t!=='gol') return;
+  const S = e.side==='h'?M.h:M.a, O = e.side==='h'?M.a:M.h;
+  if(!S || !O) return;
+  limparLance();
+  const f = velFator();
+  const lado = e.side;
+  const orcamento = Math.max(400, (tempoLance(e)||1500) * 0.62);
+
+  // eventos que não são jogada: resolve e sai
+  if(e.t==='ca' || e.t==='cv'){
+    if(e.i!=null) acender(S, e.i, e.q);
+    if(e.t==='cv') BOLA_TIMERS.push(setTimeout(()=>redesenharBotoes(), 260));
+    return;
+  }
+  if(e.t==='sub' || e.t==='lesao'){
+    if(e.i!=null) acender(S, e.i, e.q);
+    BOLA_TIMERS.push(setTimeout(()=>redesenharBotoes(), 300));
+    return;
+  }
+  if(e.t==='apito'){
+    estado({ataque:null, fase:'normal', foco:null, gol:null, setp:null, recebe:null, chute:null}, 700);
+    moverBola({x:CAMPO_W/2, y:CAMPO_H/2}, msDaBola(distBola({x:CAMPO_W/2,y:CAMPO_H/2}), 'recuo', f));
+    if(typeof POSSE!=='undefined') POSSE=null;
+    return;
+  }
+  if(e.t==='penalti' && e.tipo!=='gol'){
+    // a bola é colocada na marca com calma, não chutada até lá
+    const marca={x:S.casa?CAMPO_W-13:13, y:CAMPO_H/2};
+    estado({ataque:lado, fase:'penalti', setp:{side:lado, idx:e.i}, foco:null, recebe:null}, 550*f);
+    seqTocar([{para:marca, tipo:'sobra', ms:Math.max(400, msDaBola(distBola(marca),'sobra',f)),
+               antes:()=>acender(S, e.i, e.q)}], f);
+    return;
+  }
+
+  const L1 = montarLance(S, O, e, orcamento, f);
+  const gol = L1.gol, dir = L1.dir;
+  const seq = [];
+
+  // ---- a construção ----
+  L1.passos.forEach(pp=>{
+    seq.push({para:pp.para, tipo:pp.tipo, ms:pp.ms, antes:()=>{
+      // quem vai receber corre pro ponto e chega junto com a bola
+      estado({ataque:lado, fase:pp.fase, setp:null, gol:null, chute:null,
+              foco: pp.receptor!=null ? {side:lado, idx:pp.receptor} : EST.foco,
+              recebe: pp.receptor!=null ? {side:lado, idx:pp.receptor, x:pp.para.x, y:pp.para.y} : null},
+             pp.ms);
+      if(pp.receptor!=null && pp.fase==='area') acender(S, pp.receptor);
+    }});
+  });
+
+  // ---- o desfecho ----
+  const canto = () => CAMPO_H/2 + (rnd()<.5?-1:1)*(6.5+rnd()*3);
+  const chutar = (destino, tipoChute, depois) => {
+    const yCanto = destino.y;
+    seq.push({para:destino, tipo: tipoChute||'chute',
+      ms: msDaBola(Math.hypot(destino.x-L1.alvoChute.x, destino.y-L1.alvoChute.y), tipoChute||'chute', f),
+      antes:()=>{
+        if(L1.fim) acender(S, L1.fim.idx, e.q);
+        // o goleiro se joga para o canto do chute
+        estado({fase:'area', recebe:null, chute:{side:lado, y:yCanto}}, Math.max(120, 220*f));
+      }, depois});
+  };
+
+  if(e.t==='gol'){
+    const c = canto();
+    chutar({x:gol.x, y:c}, 'chute', ()=>{
+      tremerRede(S); flashGol(S, e.q);
+      estado({fase:'gol', foco:null, setp:null, chute:null, recebe:null,
+              gol:{side:lado, idx:e.i, canto:c}}, 900);
+      acender(S, e.i);
+    });
+    // a festa: a bola fica no fundo da rede, depois o juiz a leva pro meio
+    const rede={x:gol.x - dir*1.5, y:c};
+    seq.push({para:rede, tipo:'sobra', ms:Math.max(700, 1500*f), festa:true});
+    const meio={x:CAMPO_W/2, y:CAMPO_H/2};
+    seq.push({para:meio, tipo:'sobra',
+      ms:Math.max(600, Math.min(2200, msDaBola(Math.hypot(meio.x-rede.x, meio.y-rede.y),'sobra',f))),
+      antes:()=>estado({fase:'normal', ataque:null, foco:null, gol:null, setp:null, chute:null, recebe:null}, 700*f)});
+
+  } else if(e.t==='defesa'){
+    const gk = O.emCampo.find(u=>!u.fora && u.slot==='GOL');
+    const c = canto();
+    const pego = {x: gol.x - dir*2.2, y: c*0.62 + CAMPO_H/2*0.38};
+    chutar(pego, 'chute', ()=>{ if(gk) acender(O, gk.idx, e.q); });
+    // o goleiro segura e recoloca a bola em jogo
+    const saida = dentroDoCampo({x: gol.x - dir*(16+rnd()*8), y: CAMPO_H/2 + (rnd()-.5)*30});
+    seq.push({para:saida, tipo:'saida', ms:msDaBola(Math.hypot(saida.x-pego.x, saida.y-pego.y),'saida',f),
+      antes:()=>{
+        const u = receptorNoPonto(O, saida, {});
+        estado({ataque:ladoDe(O), fase:'normal', foco:u?{side:ladoDe(O), idx:u.idx}:null,
+                recebe:u?{side:ladoDe(O), idx:u.idx, x:saida.x, y:saida.y}:null, chute:null}, 600*f);
+      }});
+
+  } else if(e.t==='trave'){
+    const naTrave = {x:gol.x, y: CAMPO_H/2 + (rnd()<.5?-1:1)*4.6};
+    chutar(naTrave, 'chute', ()=>{
+      const r=$(S.casa?'rede-h':'rede-a');
+      if(r){ r.classList.remove('trave'); void r.getBoundingClientRect(); r.classList.add('trave'); }
+    });
+    // a sobra volta pro campo e alguém afasta
+    const sobra = dentroDoCampo({x: gol.x - dir*(9+rnd()*7), y: CAMPO_H/2 + (rnd()-.5)*22});
+    seq.push({para:sobra, tipo:'sobra', ms:msDaBola(Math.hypot(sobra.x-naTrave.x,sobra.y-naTrave.y),'sobra',f),
+      antes:()=>estado({fase:'area', chute:null, recebe:null}, 400*f)});
+    const afasta = dentroDoCampo({x: gol.x - dir*(30+rnd()*14), y: CAMPO_H/2 + (rnd()-.5)*26});
+    seq.push({para:afasta, tipo:'forte', ms:msDaBola(Math.hypot(afasta.x-sobra.x,afasta.y-sobra.y),'forte',f),
+      antes:()=>estado({ataque:ladoDe(O), fase:'normal', foco:null, recebe:null}, 600*f)});
+
+  } else if(e.t==='fora'){
+    // chute que sai: a bola cruza a linha de fundo e vem o escanteio.
+    // Ela para rente à linha, não no canto de fora da tela.
+    const yFora = rnd()<.5 ? -1.2 : CAMPO_H+1.2;
+    const destino = {x: clamp(gol.x + dir*0.8, 1, CAMPO_W-1), y: yFora};
+    seq.push({para:destino, tipo:'chute',
+      ms: msDaBola(Math.hypot(destino.x-L1.alvoChute.x, destino.y-L1.alvoChute.y), 'chute', f),
+      antes:()=>{ if(L1.fim) acender(S, L1.fim.idx, e.q);
+        estado({fase:'area', recebe:null, chute:{side:lado, y:CAMPO_H/2}}, 220*f); }});
+    const canto0 = yFora<0 ? 3 : CAMPO_H-3;
+    const bandeira = {x: S.casa?CAMPO_W-2.5:2.5, y:canto0};
+    seq.push({para:bandeira, tipo:'recuo', ms:Math.max(240, 420*f),
+      antes:()=>estado({ataque:lado, fase:'escanteio', foco:null, chute:null, recebe:null,
+                        setp:{side:lado, idx:e.i, canto:canto0}}, 700*f)});
+    const naArea = dentroDoCampo({x: gol.x - dir*7, y: CAMPO_H/2 + (rnd()-.5)*12});
+    seq.push({para:naArea, tipo:'cruzamento', ms:msDaBola(Math.hypot(naArea.x-bandeira.x,naArea.y-bandeira.y),'cruzamento',f),
+      antes:()=>{ const z=S.emCampo.filter(u=>!u.fora&&u.slot!=='GOL');
+        const quem = receptorNoPonto(S, naArea, {});
+        estado({fase:'area', setp:null, recebe: quem?{side:lado, idx:quem.idx, x:naArea.x, y:naArea.y}:null,
+                foco: quem?{side:lado, idx:quem.idx}:null}, 600*f);
+        if(quem) acender(S, quem.idx); }});
+    const afasta = dentroDoCampo({x: gol.x - dir*(26+rnd()*16), y: CAMPO_H/2 + (rnd()-.5)*26});
+    seq.push({para:afasta, tipo:'forte', ms:msDaBola(Math.hypot(afasta.x-naArea.x,afasta.y-naArea.y),'forte',f),
+      antes:()=>estado({ataque:ladoDe(O), fase:'normal', foco:null, recebe:null, setp:null}, 620*f)});
+
+  } else if(e.t==='chance'){
+    // a jogada morre: um zagueiro corta antes da finalização
+    const corta = defensorPerto(O, L1.alvoChute, {});
+    const pc = corta ? posBase(O, corta.idx) : {x: gol.x - dir*14, y: CAMPO_H/2};
+    const ponto = dentroDoCampo({x:(L1.alvoChute.x+pc.x)/2, y:(L1.alvoChute.y+pc.y)/2});
+    seq.push({para:ponto, tipo:'curto', ms:msDaBola(Math.hypot(ponto.x-L1.alvoChute.x,ponto.y-L1.alvoChute.y),'curto',f),
+      antes:()=>{ if(corta) acender(O, corta.idx, e.q);
+        estado({fase:'area', recebe: corta?{side:ladoDe(O), idx:corta.idx, x:ponto.x, y:ponto.y}:null,
+                foco: corta?{side:ladoDe(O), idx:corta.idx}:null, chute:null}, 400*f); }});
+    const afasta = dentroDoCampo({x: ponto.x - dir*(24+rnd()*14), y: CAMPO_H/2 + (rnd()-.5)*26});
+    seq.push({para:afasta, tipo:'forte', ms:msDaBola(Math.hypot(afasta.x-ponto.x,afasta.y-ponto.y),'forte',f),
+      antes:()=>estado({ataque:ladoDe(O), fase:'normal', foco:null, recebe:null}, 620*f)});
+
+  } else if(e.t==='penalti'){
+    const c = canto();
+    chutar({x:gol.x, y:c}, 'chute', ()=>{
+      tremerRede(S); flashGol(S, e.q);
+      estado({fase:'gol', foco:null, setp:null, chute:null, recebe:null, gol:{side:lado, idx:e.i, canto:c}}, 900);
+      acender(S, e.i);
+    });
+    seq.push({para:{x:CAMPO_W/2, y:CAMPO_H/2}, tipo:'recuo', ms:Math.max(500, 950*f),
+      antes:()=>estado({fase:'normal', ataque:null, foco:null, gol:null, chute:null, recebe:null}, 700*f)});
+  } else {
+    return;
+  }
+
+  LANCE_ATIVO = e;
+  const total = seqTocar(seq, f);
+  LANCE_MS[e.t] = total;
+  BOLA_TIMERS.push(setTimeout(()=>{ LANCE_ATIVO=null; }, total));
+  // depois do lance a bola pertence a quem faz sentido
+  const outro = e.side==='h'?'a':'h';
+  if(typeof POSSE!=='undefined'){
+    if(e.t==='gol'||e.t==='penalti'||e.t==='defesa'||e.t==='fora'||e.t==='trave'||e.t==='chance')
+      POSSE = {side: outro, terco:0, de:null, lev:0};
+  }
+  return total;
+}
+
+// toca a sequência: cada passo dispara no seu tempo, a bola nunca teleporta
+function seqTocar(seq, f){
+  let t=0;
+  seq.forEach(pp=>{
+    const ms = Math.max(110, pp.ms||200);
+    BOLA_TIMERS.push(setTimeout(()=>{
+      if(!M) return;
+      if(pp.antes) try{ pp.antes(); }catch(e){}
+      moverBola(pp.para, ms);
+      if(pp.depois) BOLA_TIMERS.push(setTimeout(()=>{ try{ pp.depois(); }catch(e){} }, ms));
+    }, t));
+    t += ms + (pp.festa?0:Math.round(70*(f||1)));   // um respiro entre um toque e outro
+  });
+  return t;
+}
+
+/* ---------- a bola entre os lances ----------
+   Mesmas regras: passe curto, velocidade real, e quem recebe vai até o ponto. */
+
+function bolaOciosa(){
+  if(!M || M.fim || LANCE_ATIVO || !$('bola')) return;
+  if(VEL==='turbo') return;
+  // não interrompe uma bola que ainda está viajando: com o relógio adiantado os
+  // toques vinham mais rápido que o passe e a bola voltava a saltar
+  if(typeof BOLA_ATE!=='undefined' && Date.now() < BOLA_ATE) return;
+  const f=velFator();
+  const pH = M.h.posse/Math.max(1, M.h.posse+M.a.posse);
+  if(!POSSE || !POSSE.side) POSSE = {side:(rnd()<pH?'h':'a'), terco:0, de:null, lev:0};
+  const S = POSSE.side==='h' ? M.h : M.a;
+  const O = POSSE.side==='h' ? M.a : M.h;
+  if(!S.emCampo.some(u=>!u.fora)) return;
+  const lado=ladoDe(S), dir=S.casa?1:-1;
+
+  const dono = (POSSE.de!=null) ? S.emCampo.find(u=>u.idx===POSSE.de && !u.fora) : null;
+  const pBola = {x:BOLA_POS.x, y:BOLA_POS.y};
+  const pres = (typeof pressaoSobre==='function') ? pressaoSobre(O, pBola) : {d:20, u:null};
+  const aperto = clamp(1-(pres.d-3.5)/15, 0, 1);
+
+  // perder a bola depende de estar apertado e de quem marca
+  const forte=forcas(S).mid, fraco=forcas(O).mid;
+  const dominio = clamp(forte/Math.max(1,forte+fraco), 0.32, 0.68);
+  const tec = dono && typeof atrDe==='function' ? atrDe(dono,'dri')*0.55 + atrDe(dono,'pas')*0.45 : 66;
+  const mar = pres.u && typeof atrDe==='function' ? atrDe(pres.u,'mar') : 62;
+  let perde = 0.08 + aperto*0.28 + (mar-tec)/320 - (dominio-0.5)*0.30
+            + (POSSE.terco===2 ? 0.07 : POSSE.terco===0 ? -0.03 : 0);
+  /* Quanto mais tempo com a bola, mais difícil segurar. Sem isso, um time
+     chegava a 29 passes seguidos sem perder — e a bola acampava num lado só do
+     campo por meio minuto. Numa posse longa de verdade dá uns 15 passes. */
+  POSSE.seq = (POSSE.seq||0) + 1;
+  perde += Math.min(0.26, Math.max(0, POSSE.seq-4) * 0.035);
+  if(rnd() < clamp(perde, 0.04, 0.62)) return bolaPerdida(S, O, pBola, pres, f);
+
+  // bola no meio sem dono: é pontapé inicial, um toque curto pro lado
+  if(POSSE.de==null && Math.abs(pBola.x-CAMPO_W/2)<6 && Math.abs(pBola.y-CAMPO_H/2)<8){
+    const alvo0 = dentroDoCampo({x: pBola.x - dir*(4+rnd()*5), y: pBola.y + (rnd()<.5?-1:1)*(4+rnd()*6)});
+    const u0 = receptorNoPonto(S, alvo0, {});
+    if(u0){
+      const ms0 = msDaBola(Math.hypot(alvo0.x-pBola.x, alvo0.y-pBola.y), 'curto', f);
+      POSSE.de=u0.idx; POSSE.terco=tercoDe(S, alvo0.x); POSSE.lev=0;
+      estado({ataque:lado, fase:'normal', foco:{side:lado, idx:u0.idx},
+              recebe:{side:lado, idx:u0.idx, x:alvo0.x, y:alvo0.y}, gol:null, setp:null, chute:null}, ms0);
+      moverBola(alvo0, ms0);
+      return;
+    }
+  }
+
+  // sem dono no próprio campo: o goleiro pega e recomeça dali
+  if(POSSE.de==null && POSSE.terco===0 && distBola(posGoleiro(S))<34 && rnd()<0.6){
+    const gk = S.emCampo.find(u=>!u.fora && u.slot==='GOL');
+    if(gk){
+      const g = posBase(S, gk.idx);
+      const msg = msDaBola(distBola(g), 'recuo', f);
+      POSSE.de=gk.idx; POSSE.terco=0; POSSE.lev=0;
+      estado({ataque:lado, fase:'normal', foco:{side:lado, idx:gk.idx},
+              recebe:{side:lado, idx:gk.idx, x:g.x, y:g.y}, gol:null, setp:null, chute:null}, msg);
+      moverBola(g, msg);
+      return;
+    }
+  }
+
+  // conduzir: quem tem drible e espaço leva a bola nos pés
+  if(dono && pres.d>6.5 && (POSSE.lev||0)<2 && typeof atrDe==='function' &&
+     rnd() < clamp((atrDe(dono,'dri')+atrDe(dono,'vel')-118)/150, 0.06, 0.45)){
+    POSSE.lev=(POSSE.lev||0)+1;
+    const av=4+rnd()*4;
+    const alvo=dentroDoCampo({x:pBola.x+dir*av, y:pBola.y+(rnd()-.5)*4});
+    POSSE.terco=tercoDe(S, alvo.x);
+    const ms=msDaBola(av,'conducao',f);
+    estado({ataque:lado, fase:faseDoTerco(POSSE.terco), gol:null, setp:null, chute:null,
+            foco:{side:lado, idx:dono.idx}, recebe:{side:lado, idx:dono.idx, x:alvo.x, y:alvo.y}}, ms);
+    if(POSSE.terco===2) acender(S, dono.idx);
+    moverBola(alvo, ms);
+    return;
+  }
+  POSSE.lev=0;
+
+  // o passe: escolhe um ponto a uma distância de passe, na direção que o time quer
+  const avancar = rnd() < (POSSE.terco===0 ? 0.50 : POSSE.terco===1 ? 0.72 : 0.58);
+  const pas = dono && typeof atrDe==='function' ? atrDe(dono,'pas') : 70;
+  const lancar = avancar && rnd() < clamp((pas-64)/230, 0.02, 0.14);
+  const dist = lancar ? 26+rnd()*12 : 9+rnd()*9;
+  const ang = avancar ? (rnd()-.5)*1.5 : (rnd()<.5 ? 1.9 : -1.9) + (rnd()-.5)*0.8;
+  const alvo = dentroDoCampo({
+    x: pBola.x + dir*Math.cos(ang)*dist,
+    y: pBola.y + Math.sin(ang)*dist
+  });
+  const d = Math.hypot(alvo.x-pBola.x, alvo.y-pBola.y);
+  const tipo = lancar ? 'lancamento' : d>17 ? 'forte' : d>9 ? 'passe' : 'curto';
+  const ms = msDaBola(d, tipo, f);
+  const u = receptorNoPonto(S, alvo, POSSE.de!=null?{[POSSE.de]:1}:{});
+  if(!u) return;
+  POSSE.de = u.idx;
+  POSSE.terco = tercoDe(S, alvo.x);
+  estado({ataque:lado, fase:faseDoTerco(POSSE.terco), gol:null, setp:null, chute:null,
+          foco:{side:lado, idx:u.idx}, recebe:{side:lado, idx:u.idx, x:alvo.x, y:alvo.y}}, ms);
+  if(POSSE.terco===2) acender(S, u.idx);
+  moverBola(alvo, ms);
+}
+
+// a bola foi roubada: quem pressionava leva, ali mesmo onde a bola estava
+function bolaPerdida(S, O, pBola, pres, f){
+  const lado=ladoDe(O);
+  let ladrao = (pres.d<11) ? pres.u : defensorPerto(O, pBola, {});
+  if(!ladrao){ POSSE={side:lado, terco:0, de:null, lev:0}; return; }
+  const p = dentroDoCampo({x: pBola.x + (rnd()-.5)*4, y: pBola.y + (rnd()-.5)*4});
+  const ms = msDaBola(Math.hypot(p.x-pBola.x, p.y-pBola.y)+2, 'curto', f);
+  POSSE = {side:lado, terco:tercoDe(O, p.x), de:ladrao.idx, lev:0, seq:0};
+  estado({ataque:lado, fase:'normal', gol:null, setp:null, chute:null,
+          foco:{side:lado, idx:ladrao.idx}, recebe:{side:lado, idx:ladrao.idx, x:p.x, y:p.y}}, ms);
+  if(POSSE.terco>=1) acender(O, ladrao.idx);
+  moverBola(p, ms);
+}
+
+/* O orçamento de tempo de cada lance. Com a bola andando em velocidade de
+   verdade, uma jogada de gol precisa de mais fôlego do que os 4,3s de antes. */
+function tempoLance(e){
+  const f=(typeof velFator==='function')?velFator():1;
+  if(VEL==='turbo' && e.t!=='gol') return 0;
+  const base={gol:6000, penalti:2600, defesa:2900, trave:2800, fora:3300,
+              chance:2600, ca:600, cv:900, sub:900, lesao:900, apito:800}[e.t];
+  if(!base) return 0;
+  return Math.max(120, base*f);
+}
+
+function animarLance(e){
+  const r = animarLanceBase(e);
+  return r;
+}
+
+/* A transmissão mostra o que vale a pena, não tudo.
+
+   Medido: o motor gera 22 momentos por jogo — um a cada 4 minutos de jogo, que
+   na velocidade normal são 2,5 segundos. Só que a jogada de um gol leva 6,4
+   segundos para ser contada. Ou seja: cada jogada era cortada pela seguinte
+   antes de terminar, e a bola saltava de um lado ao outro. Era esse o
+   "sem sentido" — não a velocidade da bola, e sim jogada nenhuma chegando ao fim.
+
+   Agora gol, pênalti e expulsão sempre aparecem. Os demais lances só viram
+   animação se a jogada anterior já teve tempo de acabar; senão entram só na
+   narração, com a bola seguindo o fluxo normal. Dá cerca de 9 momentos por
+   jogo, que é o que cabe. */
+let ULT_LANCE = -99;
+const INTERVALO_LANCE = 11;      // minutos de jogo entre uma jogada e outra
+
+function mereceLance(e){
+  if(!e || !e.t) return false;
+  if(VEL==='turbo') return e.t==='gol';
+  if(e.t==='gol' || e.t==='penalti' || e.t==='cv'){ ULT_LANCE = e.min||0; return true; }
+  if(e.t==='ca' || e.t==='sub' || e.t==='lesao' || e.t==='apito') return true;  // rápidos, não são jogada
+  const min = e.min||0;
+  if(min - ULT_LANCE < INTERVALO_LANCE) return false;
+  ULT_LANCE = min;
+  return true;
+}
 /* ===== 06-partida ===== */
 'use strict';
 
@@ -5762,7 +6515,7 @@ const VELS = {pausado:0, normal:620, rapido:180, turbo:45};
 
 function fecharMatch(){ pararTick(); $('match').classList.remove('on'); M=null; }
 
-function pararTick(){ if(tick){clearInterval(tick);tick=null;} }
+function pararTick(){ if(tick){clearInterval(tick);clearTimeout(tick);tick=null;} }
 
 function alternarVel(){ if(VEL==='pausado'){VEL='normal';} else {VEL='pausado';} iniciarTick(); desenharMatch(); }
 
@@ -5770,6 +6523,7 @@ function mudarVel(){ const o=['normal','rapido','turbo']; const i=o.indexOf(VEL)
 
 function tratarPausa(){
   const p=M.pausa; M.pausa=null;
+  limparFila();                                  // tudo que estava na fila entra no placar antes da janela
   if(p.tipo==='intervalo') sheetIntervalo();
   else if(p.tipo==='penalti') sheetPenalti(p.side);
   else if(p.tipo==='lesao') sheetLesao(p.side,p.uid);
@@ -6063,7 +6817,7 @@ function publicoDoJogo(L, h, a, comp, fase, rodada){
   const demanda = (typeof demandaTorcida==='function') ? demandaTorcida(c) : cap;
   const publico = Math.round(clamp(Math.min(cap, demanda)*pct, 900, cap));
   // atmosfera: o quanto a casa empurra (1,02 a 1,13)
-  const atmosfera = 1 + 0.035 + 0.075*Math.pow(clamp((pct-0.25)/0.75,0,1), 1.15);
+  const atmosfera = 1 + 0.045 + 0.086*Math.pow(clamp((pct-0.25)/0.75,0,1), 1.15);
   motivos.sort((x,y)=>y.p-x.p);
   return {publico, pct, atmosfera, motivo:(motivos[0]||{}).t||''};
 }
@@ -6244,7 +6998,9 @@ function acharMarcador(){
   if(!EST.foco || !M){ EST.marca=null; EST.marca2=null; return; }
   const S = EST.foco.side==='h'?M.h:M.a;
   const O = EST.foco.side==='h'?M.a:M.h;
-  const p = posBase(S, EST.foco.idx);
+  // marca onde o jogador realmente está: se ele foi buscar a bola, é lá que se marca
+  const p = (EST.recebe && EST.recebe.side===EST.foco.side && EST.recebe.idx===EST.foco.idx)
+    ? {x:EST.recebe.x, y:EST.recebe.y} : posBase(S, EST.foco.idx);
   const ord = O.emCampo.filter(u=>!u.fora && u.slot!=='GOL')
     .map(u=>{ const q=posBase(O,u.idx); return {idx:u.idx, d:(q.x-p.x)**2+(q.y-p.y)**2}; })
     .sort((a,b)=>a.d-b.d);
@@ -6274,15 +7030,18 @@ function estado(novo, dur){
   moverBotoes();
 }
 
+// Nome curto para o campo: "Lucas Moura" fica inteiro, "Jonathan Calleri" vira "Calleri",
+// "André Silva" vira "André" (sobrenome comum demais não identifica ninguém).
+const SOBRENOMES_COMUNS=['silva','santos','souza','sousa','oliveira','pereira','lima','costa','alves','rodrigues','ferreira','gomes',
+  'martins','ribeiro','carvalho','araujo','araújo','nascimento','junior','júnior','filho','neto','jr.','jr'];
 function nomeCampo(p){
   const n=String(p.nome||'').trim();
-  const partes=n.split(/\s+/);
-  let out = n;
-  if(partes.length>1){
-    const ult=partes[partes.length-1];
-    const primeiro=partes[0];
-    out = (ult.length>=4 && ult.length<=11) ? ult : (primeiro.length<=11 ? primeiro : ult);
-  }
+  const partes=n.split(/\s+/).filter(x=>!/^(de|da|do|dos|das|e)$/i.test(x));
+  if(partes.length<=1) return n.length>11 ? n.slice(0,10)+'.' : n;
+  if(n.length<=11) return n;                       // "Lucas Moura", "Pablo Maia"
+  const ult=partes[partes.length-1], primeiro=partes[0];
+  let out = SOBRENOMES_COMUNS.includes(ult.toLowerCase()) ? primeiro : ult;
+  if(out.length<4 && primeiro!==out) out = primeiro;
   if(out.length>11) out=out.slice(0,10)+'.';
   return out;
 }
@@ -6387,9 +7146,11 @@ function moverBola(p, ms){
     tr.style.animation='none'; void tr.getBoundingClientRect(); tr.style.animation=`passeSome ${Math.max(.35,(ms/1000)+.25).toFixed(2)}s linear forwards`;
   }
   BOLA_POS={x:p.x, y:p.y};
+  BOLA_ATE = Date.now() + ms;          // até quando a bola está viajando
   b.style.transitionDuration=(ms/1000).toFixed(2)+'s';
   b.style.transform=`translate(${p.x.toFixed(2)}px,${p.y.toFixed(2)}px)`;
 }
+let BOLA_ATE = 0;
 function distBola(p){ return Math.hypot(p.x-BOLA_POS.x, p.y-BOLA_POS.y); }
 
 function tremerRede(S){
@@ -6693,9 +7454,20 @@ function fecharReplay(){
   if(d) setTimeout(d, 200);
 }
 
-let FILA_TIMERS=[], SEGURA=0;
+let FILA_TIMERS=[], SEGURA=0, FILA_PEND=[];
 
-function limparFila(){ FILA_TIMERS.forEach(clearTimeout); FILA_TIMERS=[]; SEGURA=0; }
+// mostra um evento pendente (placar e narração) uma vez só
+function mostrarPendente(e){
+  const i=FILA_PEND.indexOf(e); if(i>=0) FILA_PEND.splice(i,1);
+  mostrarEvento(e);
+}
+// Ao cortar a fila (troca, tática, pular), o que ainda não apareceu aparece na hora:
+// senão o placar de cima fica atrasado em relação ao jogo de verdade.
+function limparFila(){
+  FILA_TIMERS.forEach(clearTimeout); FILA_TIMERS=[]; SEGURA=0;
+  if(FILA_PEND.length && M){ const pend=FILA_PEND.slice(); FILA_PEND=[]; pend.forEach(e=>mostrarEvento(e)); try{ desenharMatch(); }catch(x){} }
+  FILA_PEND=[];
+}
 
 function seguraAte(ms){ SEGURA=Math.max(SEGURA, Date.now()+ms); }
 
@@ -6745,7 +7517,22 @@ function passoReplay(){
   tocarFila(novos, acabou);
 }
 
-function iniciarTick(){ pararTick(); limparFila(); if(VELS[VEL]>0) tick=setInterval(passo, VELS[VEL]); }
+/* O relógio adianta o que não interessa. Metade do jogo era a bola rodando sem
+   nada acontecer — medido: 55% do tempo. Agora, quando não há jogada rolando, o
+   minuto passa em 1/4 do tempo; assim que um lance começa, volta ao normal para
+   dar pra acompanhar. O jogo inteiro cai de 90 para cerca de 45 segundos sem
+   perder uma jogada sequer. */
+function iniciarTick(){ pararTick(); limparFila();
+  if(typeof ULT_LANCE!=='undefined') ULT_LANCE = -99;   // jogo novo, conta zerada
+  agendarPasso(); }
+
+function agendarPasso(){
+  if(!(VELS[VEL]>0)) return;
+  // só a jogada rolando segura o relógio; a espera da fila pode ser conferida rápido
+  const vazio = !LANCE_ATIVO && !(M && M.pausa);
+  const ms = vazio ? Math.max(60, Math.round(VELS[VEL]*0.19)) : VELS[VEL];
+  tick = setTimeout(()=>{ passo(); if(tick) agendarPasso(); }, ms);
+}
 
 function iniciarTickReplay(){ pararTick(); limparFila(); if(VELS[VEL]>0) tick=setInterval(passoReplay, VELS[VEL]); }
 
@@ -6935,6 +7722,11 @@ function posCrua(S, u){
   if((EST.fase==='penalti' || EST.fase==='escanteio') && EST.setp){
     const p=posSetPeca(S,u); if(p) return p;
   }
+  // quem vai receber o passe corre até o ponto e chega junto com a bola:
+  // é isso que faz um passe parecer um passe, e não a bola achando um jogador
+  if(EST.recebe && EST.recebe.side===ladoDe(S) && EST.recebe.idx===u.idx){
+    return {x: clamp(EST.recebe.x, 2.2, CAMPO_W-2.2), y: clamp(EST.recebe.y, 3, CAMPO_H-3)};
+  }
   const base=posBase(S,u.idx);
   const dir=S.casa?1:-1, meu=ladoDe(S);
   const atacando = EST.ataque===meu;
@@ -6949,11 +7741,17 @@ function posCrua(S, u){
   const larg = EST.fase==='area' ? (atacando?1.04:0.9) : atacando ? 1.04 : defendendo ? 0.94 : 1;
   let y = CAMPO_H/2 + (base.y-CAMPO_H/2)*larg;
 
+  // o bloco desliza para o lado da bola: quem defende fecha mais, quem ataca abre
+  if(u.slot!=='GOL'){
+    const puxa = defendendo ? 0.17 : atacando ? 0.07 : 0.10;
+    y += (BOLA_POS.y - y) * puxa;
+  }
+
   x += Math.sin(u.idx*2.31 + EST.t*0.9)*0.9;
   y += Math.cos(u.idx*1.87 + EST.t*0.8)*1.0;
 
   if(EST.foco && EST.foco.side===meu && EST.foco.idx===u.idx){
-    x += dir*5; y += (CAMPO_H/2-y)*0.18;
+    x += dir*(5 + (EST.foco.ad||0)); y += (CAMPO_H/2-y)*0.18;   // ad = quanto já conduziu
   }
   if(EST.foco && EST.foco.side!==meu && EST.marca===u.idx && u.slot!=='GOL'){
     const alvoS = EST.foco.side==='h'?M.h:M.a;
@@ -6968,6 +7766,12 @@ function posCrua(S, u){
     const pb = posBase(S, EST.foco.idx);
     const d = Math.hypot(pb.x-x, pb.y-y);
     if(d<22){ x += dir*2.5; y += (y>pb.y?1:-1)*2.2; }
+  }
+  // goleiro do lado que sofre o chute pula para o canto
+  if(EST.chute && EST.chute.side!==meu && u.slot==='GOL'){
+    const g=golDe(S);
+    return {x: clamp(g.x + (S.casa?-2.2:2.2), 2.5, CAMPO_W-2.5),
+            y: clamp(CAMPO_H/2 + (EST.chute.y-CAMPO_H/2)*0.62, 4, CAMPO_H-4)};
   }
   if(EST.fase==='gol' && EST.gol && EST.gol.side===meu){
     const canto = {x: S.casa?CAMPO_W-9:9, y: EST.gol.canto};
@@ -6984,157 +7788,12 @@ function posCrua(S, u){
 
 const PESO_SAIDA={GOL:0, ZAG:3, LAT:4, VOL:5, MEI:4, PON:2, ATA:1};
 
-/* A jogada sai de onde a bola está: quem tem a bola (ou o mais perto dela)
-   toca para um companheiro à frente e perto, até chegar em quem dá o passe e
-   em quem finaliza. Nada de bola pulando de um lado ao outro do campo. */
-function construirJogada(S, e){
-  const emC=S.emCampo.filter(u=>!u.fora && u.slot!=='GOL');
-  const fim=S.emCampo.find(u=>u.idx===e.i);
-  const ass=(e.ia!=null)?S.emCampo.find(u=>u.idx===e.ia):null;
-  const gol=golDe(S), dir=S.casa?1:-1;
-  const usados={}; if(fim) usados[fim.idx]=1; if(ass) usados[ass.idx]=1;
-  // começa em quem tem a bola, se for deste time; senão no mais perto da bola
-  let atual=null;
-  if(POSSE && POSSE.side===ladoDe(S) && POSSE.de!=null) atual=emC.find(u=>u.idx===POSSE.de && !usados[u.idx])||null;
-  if(!atual){ let d0=1e9; emC.forEach(u=>{ if(usados[u.idx]) return; const d=distBola(posViva(S,u)); if(d<d0){ d0=d; atual=u; } }); }
-  const cadeia=[];
-  const alvoFinal = ass||fim;
-  const pAlvo = alvoFinal ? posViva(S, alvoFinal) : gol;
-  if(atual){
-    cadeia.push(atual); usados[atual.idx]=1;
-    // mais um ou dois toques a caminho do alvo, sempre com alguém perto e à frente
-    for(let k=0;k<2;k++){
-      const pa=posViva(S, cadeia[cadeia.length-1]);
-      const faltam=Math.hypot(pAlvo.x-pa.x, pAlvo.y-pa.y);
-      if(faltam<26) break;
-      let melhor=null, w0=-1e9;
-      emC.forEach(u=>{ if(usados[u.idx]) return;
-        const q=posViva(S,u);
-        const d=Math.hypot(q.x-pa.x, q.y-pa.y);
-        const avanca=(q.x-pa.x)*dir;
-        const aproxima=faltam-Math.hypot(pAlvo.x-q.x, pAlvo.y-q.y);
-        if(d>34 || d<4) return;
-        const w=aproxima*1.2 + avanca*0.5 - d*0.35 + ((u.idx*7)%5)*0.6;
-        if(w>w0){ w0=w; melhor=u; } });
-      if(!melhor) break;
-      usados[melhor.idx]=1; cadeia.push(melhor);
-    }
-  }
-  if(ass) cadeia.push(ass);
-  if(fim) cadeia.push(fim);
-  return cadeia;
-}
-
-function animarLanceBase(e){
-  if(!M || !$('campo-svg')) return;
-  if(VEL==='turbo' && e.t!=='gol') return;
-  const S = e.side==='h'?M.h:M.a, O = e.side==='h'?M.a:M.h;
-  if(!S) return;
-  limparLance();
-  const f=velFator(), pa=(t)=>Math.max(70, t*f);
-  const lado=e.side;
-  const seq=[];
-  const meio = {x:CAMPO_W/2 + (S.casa?-6:6), y:CAMPO_H/2 + (rnd()-.5)*22};
-  const alvoU = e.i!=null ? S.emCampo.find(u=>u.idx===e.i) : null;
-  const alvoP = ()=> alvoU ? posViva(S, alvoU) : meio;
-  const gol  = golDe(S);
-  const sobe   = ()=> estado({ataque:lado, fase:'ataque', setp:null}, pa(400));
-  const naArea = ()=> estado({fase:'area', setp:null}, pa(300));
-  const volta  = ()=> estado({fase:'normal', foco:null, gol:null, setp:null}, pa(700));
-  /* um toque: a bola vai até o jogador, ele acende, o bloco sobe */
-  const toque = (u, fase) => {
-    seq.push([()=>posViva(S,u), 300, ()=>{
-      estado({ataque:lado, fase:fase||'ataque', foco:{side:lado, idx:u.idx}, setp:null}, pa(420));
-      acender(S, u.idx);
-    }]);
-  };
-
-  if(e.t==='gol'){
-    if(e.tipo==='penalti'){
-      estado({ataque:lado, fase:'penalti', setp:{side:lado, idx:e.i}, foco:null}, pa(500));
-      seq.push([()=>({x:S.casa?CAMPO_W-13:13, y:CAMPO_H/2}), 420, ()=>acender(S, e.i, e.q)]);
-      seq.push([()=>({x:gol.x, y:gol.y+(rnd()-.5)*5}), 260, ()=>{
-        tremerRede(S); flashGol(S, e.q);
-        estado({fase:'gol', foco:null, setp:null, gol:{side:lado, idx:e.i, canto: rnd()<.5?10:CAMPO_H-10}}, 900);
-        acender(S, e.i); }]);
-      seq.push([()=>{const u=S.emCampo.find(z=>z.idx===e.i); const q=u?posViva(S,u):gol; return {x:q.x,y:q.y+2.6};}, 1700, null]);
-      seq.push([()=>({x:CAMPO_W/2,y:CAMPO_H/2}), 1000, volta]);
-    } else {
-      const cadeia=construirJogada(S, e);
-      cadeia.forEach((u,k)=>toque(u, k>=cadeia.length-2?'area':'ataque'));
-      seq.push([()=>({x:gol.x, y:gol.y+(rnd()-.5)*6}), 260, ()=>{
-        tremerRede(S); flashGol(S, e.q);
-        estado({fase:'gol', foco:null, setp:null, gol:{side:lado, idx:e.i, canto: rnd()<.5?10:CAMPO_H-10}}, 900);
-        acender(S, e.i); }]);
-      seq.push([()=>{const u=S.emCampo.find(z=>z.idx===e.i); const q=u?posViva(S,u):gol; return {x:q.x,y:q.y+2.6};}, 1700, null]);
-      seq.push([()=>({x:CAMPO_W/2,y:CAMPO_H/2}), 1000, volta]);
-    }
-  } else if(e.t==='penalti'){
-    estado({ataque:lado, fase:'penalti', setp:{side:lado, idx:e.i}, foco:null}, pa(550));
-    seq.push([()=>({x:S.casa?CAMPO_W-13:13, y:CAMPO_H/2}), 420, ()=>acender(S, e.i, e.q)]);
-  } else if(e.t==='defesa'){
-    const cad=construirJogada(S, e).slice(-2);
-    cad.forEach(u=>toque(u,'area'));
-    const gk=O.emCampo.find(u=>!u.fora&&u.slot==='GOL');
-    seq.push([()=>gk?posViva(O,gk):posGoleiro(O), 230, ()=>{ naArea(); if(gk) acender(O, gk.idx, e.q); }]);
-    seq.push([()=>({x:posGoleiro(O).x+(S.casa?-16:16), y:CAMPO_H/2+(rnd()-.5)*24}), 520, volta]);
-  } else if(e.t==='trave'){
-    const cad=construirJogada(S, e).slice(-2);
-    cad.forEach(u=>toque(u,'area'));
-    seq.push([()=>({x:gol.x, y:CAMPO_H/2-4.4}), 220, ()=>{ const r=$(S.casa?'rede-h':'rede-a');
-      if(r){r.classList.remove('trave');void r.getBoundingClientRect();r.classList.add('trave');} }]);
-    seq.push([()=>({x:gol.x+(S.casa?-18:18), y:CAMPO_H/2+9}), 460, volta]);
-  } else if(e.t==='fora'){
-    // chute pra fora vira escanteio: a bola sai e o time sobe pra área
-    const cad=construirJogada(S, e).slice(-2);
-    cad.forEach(u=>toque(u,'area'));
-    seq.push([()=>({x:gol.x, y:rnd()<.5?-3:CAMPO_H+3}), 300, null]);
-    const canto = rnd()<.5 ? 3 : CAMPO_H-3;
-    seq.push([()=>({x: (S.casa?CAMPO_W-2.5:2.5), y:canto}), 320, ()=>{
-      estado({ataque:lado, fase:'escanteio', foco:null, setp:{side:lado, idx:e.i, canto}}, pa(620)); }]);
-    seq.push([()=>({x: gol.x-(S.casa?9:-9), y:CAMPO_H/2+(rnd()-.5)*10}), 520, ()=>{
-      const z=S.emCampo.filter(u=>!u.fora&&u.slot!=='GOL');
-      if(z.length) acender(S, pick(z).idx); }]);
-    seq.push([()=>({x:CAMPO_W/2+(S.casa?-10:10), y:CAMPO_H/2+(rnd()-.5)*18}), 560, volta]);
-  } else if(e.t==='chance'){
-    const cad=construirJogada(S, e);
-    cad.forEach((u,k)=>toque(u, k>=cad.length-2?'area':'ataque'));
-    seq.push([()=>{const a=alvoP(); return {x:a.x+(S.casa?-12:12), y:a.y+(rnd()-.5)*16};}, 420, volta]);
-  } else if(e.t==='ca'||e.t==='cv'){
-    if(e.i!=null) acender(S, e.i, e.q);
-    if(e.t==='cv') BOLA_TIMERS.push(setTimeout(()=>{ redesenharBotoes(); }, 260));
-    return;
-  } else if(e.t==='sub'||e.t==='lesao'){
-    if(e.i!=null) acender(S, e.i, e.q);
-    BOLA_TIMERS.push(setTimeout(()=>{ redesenharBotoes(); }, 300));
-    return;
-  } else if(e.t==='apito'){
-    estado({ataque:null, fase:'normal', foco:null, gol:null, setp:null}, 700);
-    moverBola({x:CAMPO_W/2,y:CAMPO_H/2}, 700);
-    return;
-  } else return;
-
-  LANCE_ATIVO=e; let t=0;
-  seq.forEach(([pf,ms,fn])=>{
-    const d=pa(ms);
-    BOLA_TIMERS.push(setTimeout(()=>{ if(fn) fn(); moverBola(typeof pf==='function'?pf():pf, d); }, t));
-    t+=d;
-  });
-  BOLA_TIMERS.push(setTimeout(()=>{ LANCE_ATIVO=null; }, t));
-}
+/* A construção da jogada e a animação do lance vivem em 06-lance.js. */
 
 EV_IMPORTANTE.length=0;
 
 ['gol','penalti','cv','apito','lesao'].forEach(x=>EV_IMPORTANTE.push(x));
 
-function tempoLance(e){
-  const f=(typeof velFator==='function')?velFator():1;
-  if(VEL==='turbo' && e.t!=='gol') return 0;
-  const base={gol:4300, penalti:1000, defesa:1300, trave:1250, fora:2300,
-              chance:1500, ca:600, cv:900, sub:900, lesao:900, apito:800}[e.t];
-  if(!base) return 0;
-  return Math.max(120, base*f);
-}
 
 function tempoTexto(e){
   const f=(typeof velFator==='function')?velFator():1;
@@ -7143,12 +7802,25 @@ function tempoTexto(e){
   return base ? base*f : 0;
 }
 
+/* Segurar o relógio até a jogada acabar. Antes só o gol era segurado até o fim;
+   uma defesa era solta em 1 segundo enquanto a animação levava 3,5, e o evento
+   seguinte entrava por cima dela. Se a jogada merece ser mostrada, ela termina. */
 function tempoSegura(e){
   const d=tempoLance(e);
   if(!d) return 0;
-  if(e.t==='gol'||e.t==='fora'||e.t==='penalti') return d;
-  const f=(typeof velFator==='function')?velFator():1;
-  return Math.min(d, tempoTexto(e) + 240*f);
+  return d;
+}
+
+/* A peça é o botão, como no futebol de mesa: disco com borda, brilho por cima
+   e o número no meio. As cores são as do jogo (uniforme 2 quando batem com o
+   adversário); o goleiro usa um botão escuro, que é o de camisa diferente. */
+function pecaSVG(c1, c2, num, gk){
+  const cor = gk ? '#2A2F36' : c1, tinta = gk ? '#F2C233' : c2;
+  return `<ellipse class="bot-sombra" cx=".35" cy=".9" rx="3.1" ry="3"/>
+    <circle class="bot-c" r="3.05" fill="${tinta}" stroke="rgba(0,0,0,.45)" stroke-width=".3"/>
+    <circle r="2.45" fill="${cor}"/>
+    <path d="M-2.1 -1.2 A2.45 2.45 0 0 1 2.1 -1.2 A3.4 3.4 0 0 0 -2.1 -1.2 Z" fill="#fff" opacity=".22"/>
+    <text class="bot-num" y="1.1" text-anchor="middle" fill="${tinta}">${num||''}</text>`;
 }
 
 function discosLado(S){
@@ -7157,12 +7829,9 @@ function discosLado(S){
   const cb=coresDoJogo()[ladoDe(S)], c1=cb.a, c2=cb.b, lado=ladoDe(S);
   return S.emCampo.filter(u=>!u.fora).map(u=>{
     const p=posViva(S,u);
+    const n=(typeof numeroDe==='function'?numeroDe(u.p):'');
     return `<g class="bot" id="bot-${lado}-${u.idx}" style="transform:translate(${p.x.toFixed(2)}px,${p.y.toFixed(2)}px)">
-      <g class="bot-in">
-        <ellipse class="bot-sombra" cx="0" cy="2.1" rx="2.4" ry=".9"/>
-        <circle class="bot-c" r="2.5" fill="${c1}" stroke="${c2}" stroke-width=".7"/>
-        <text class="bot-num" y="1.15" text-anchor="middle" fill="${c2}">${typeof numeroDe==='function'?numeroDe(u.p):''}</text>
-      </g></g>`;}).join('');
+      <g class="bot-in">${pecaSVG(c1, c2, n==='–'?'':n, u.slot==='GOL')}</g></g>`;}).join('');
 }
 
 function addEvento(e){
@@ -7215,84 +7884,31 @@ function jogadorDoTerco(S, terco, evitar){
 
 function faseDoTerco(t){ return t>=2 ? 'ataque' : 'normal'; }
 
-function bolaOciosa(){
-  if(!M||M.fim||LANCE_ATIVO||!$('bola')) return;
-  if(VEL==='turbo') return;
-  const pH = M.h.posse/Math.max(1, M.h.posse+M.a.posse);
-
-  // quem começa com a bola
-  if(!POSSE || !POSSE.side){
-    POSSE = {side: (rnd()<pH?'h':'a'), terco:0, de:null};
-  }
-  const S = POSSE.side==='h' ? M.h : M.a;
-  const O = POSSE.side==='h' ? M.a : M.h;
-  if(!S.emCampo.some(u=>!u.fora)) return;
-
-  // o que acontece com esta bola
-  const r = rnd();
-  const forte = forcas(S).mid, fraco = forcas(O).mid;
-  const dominio = clamp(forte/Math.max(1,forte+fraco), 0.32, 0.68);
-  const perde = 0.30 - (dominio-0.5)*0.34;          // time melhor perde menos
-  if(r < perde){
-    // perdeu a bola: o adversário mais perto dela rouba — e sai jogando dali
-    let ladrao=null, d0=1e9;
-    O.emCampo.forEach(u=>{ if(u.fora||u.slot==='GOL') return; const d=distBola(posViva(O,u)); if(d<d0){ d0=d; ladrao=u; } });
-    POSSE = {side: POSSE.side==='h'?'a':'h', terco:0, de:ladrao?ladrao.idx:null, avancar:false};
-    if(ladrao){
-      const lado=ladoDe(O), p=posViva(O,ladrao);
-      POSSE.terco=tercoDe(O,p.x);
-      estado({ataque:lado, fase:'normal', foco:{side:lado, idx:ladrao.idx}, gol:null, setp:null}, Math.max(300, 640*velFator()));
-      moverBola({x:p.x, y:p.y});
-      return;
-    }
-    return bolaOciosaDesenha();
-  }
-  POSSE.avancar = r < perde + 0.62;                 // na maioria dos toques o time tenta subir
-  bolaOciosaDesenha();
+// atributo de quem está em campo (o motor já garantiu os atributos de todo mundo)
+function atrDe(u, k){
+  const p = u && u.p; if(!p) return 66;
+  const at = p.at || (typeof garanteAtributos==='function'
+    ? garanteAtributos(p, (typeof L!=='undefined'&&L)?L.seed:'x') : null);
+  const v = at ? at[k] : null;
+  return (typeof v==='number') ? v : (p.ovr||66);
 }
+
+// quem está marcando: o adversário de linha mais perto do ponto
+function pressaoSobre(O, p){
+  let d=1e9, u=null;
+  O.emCampo.forEach(z=>{ if(z.fora||z.slot==='GOL') return;
+    const q=posViva(O,z), dd=Math.hypot(q.x-p.x, q.y-p.y);
+    if(dd<d){ d=dd; u=z; } });
+  return {d, u};
+}
+
+/* A bola entre um lance e outro está em 06-lance.js (bolaOciosa). */
 
 // em que terço do campo (do ponto de vista de S) está um ponto x
 function tercoDe(S, x){ const t=S.casa ? x/CAMPO_W : 1-x/CAMPO_W; return t<0.38?0 : t<0.66?1 : 2; }
 
-// quem recebe o passe: perto e, de preferência, à frente
-function receptorDe(S, deIdx, querAvancar){
-  const dir=S.casa?1:-1;
-  const de=S.emCampo.find(u=>u.idx===deIdx);
-  const p0=de?posViva(S,de):BOLA_POS;
-  let melhor=null, w0=-1e9;
-  S.emCampo.forEach(u=>{ if(u.fora||u.slot==='GOL'||u.idx===deIdx) return;
-    const q=posViva(S,u);
-    const d=Math.hypot(q.x-p0.x, q.y-p0.y);
-    if(d<4) return;
-    const avanca=(q.x-p0.x)*dir;
-    const w=(querAvancar?avanca*0.9:-Math.abs(avanca)*0.3) - Math.max(0,d-18)*0.9 + rnd()*7;
-    if(w>w0){ w0=w; melhor=u; } });
-  return melhor;
-}
 
-function bolaOciosaDesenha(){
-  const S = POSSE.side==='h' ? M.h : M.a;
-  const u = receptorDe(S, POSSE.de, POSSE.avancar!==false) || jogadorDoTerco(S, POSSE.terco, POSSE.de);
-  if(!u) return;
-  POSSE.de = u.idx;
-  const lado = ladoDe(S);
-  const p=posViva(S,u);
-  POSSE.terco = tercoDe(S, p.x);
-  estado({ataque:lado, fase:faseDoTerco(POSSE.terco), foco:{side:lado, idx:u.idx}, gol:null, setp:null},
-         Math.max(300, 640*velFator()));
-  if(POSSE.terco===2) acender(S, u.idx);            // só nomeia quem chega na frente
-  moverBola({x:p.x+(rnd()-.5)*2, y:p.y+(rnd()-.5)*2});
-}
 
-function animarLance(e){
-  const r = animarLanceBase(e);
-  if(!M || !e || !e.t) return r;
-  const outro = e.side==='h' ? 'a' : 'h';
-  if(e.t==='gol' || e.t==='apito')            POSSE = {side:outro, terco:0, de:null};
-  else if(e.t==='defesa' || e.t==='fora')     POSSE = {side:outro, terco:0, de:null};
-  else if(e.t==='trave' || e.t==='chance')    POSSE = {side:outro, terco:rnd()<.5?0:1, de:null};
-  return r;
-}
 /* ===== 06-vestiario =====
    O vestiário no meio do jogo, no espírito do Brasfoot: o campo com a
    formação, cada jogador como uma camisa com nome, força e energia, o banco
@@ -7390,11 +8006,11 @@ function telaVestiario(modo){
     const cd=coordDe(S.tac, u.idx);
     const x=cd[0], y=7+cd[1]*1.22;
     const sel=VEST.sai===u.id;
-    const nome=esc((u.p.nome||'').split(' ').slice(-1)[0]);
+    const nome=esc(nomeCampo(u.p));
     return `<g class="vg-peca" transform="translate(${x},${y})" onclick="vestToque('${u.id}')">
       ${camisaPeca(c, numDe(u), sel)}
       <rect x="-11.5" y="8.4" width="23" height="8.8" rx="1.8" fill="rgba(0,0,0,.55)"/>
-      <text y="12" text-anchor="middle" font-size="3.7" font-weight="700" font-family="Barlow,sans-serif" fill="#fff">${nome.length>11?nome.slice(0,10)+'.':nome}</text>
+      <text y="12" text-anchor="middle" font-size="3.7" font-weight="700" font-family="Barlow,sans-serif" fill="#fff">${nome}</text>
       <text y="15.9" text-anchor="middle" font-size="3.2" font-family="JetBrains Mono,monospace" fill="#dfe8e2">F${u.p.ovr} <tspan fill="${corEnergia(u.energia)}">E${Math.round(u.energia)}</tspan></text>
       ${u.gols?`<circle cx="9" cy="-8" r="2.6" fill="#fff" stroke="#111" stroke-width=".5"/><text x="9" y="-6.8" text-anchor="middle" font-size="3.4" font-weight="700" fill="#111">${u.gols}</text>`:''}
       ${u.cv?`<rect x="-12" y="-10" width="3" height="4.2" fill="#D3362B"/>`:u.ca?`<rect x="-12" y="-10" width="3" height="4.2" fill="#F2C230"/>`:''}
@@ -7431,7 +8047,7 @@ function telaVestiario(modo){
       : `<p class="xs mut" style="margin:6px 2px 4px">Toque num jogador do campo e depois num do banco para trocar.</p>`}
     <div class="vg-banco">${banco.map(p=>`<button class="vg-res${VEST.entra===p.id?' sel':''}${p.lesao>0?' les':''}" onclick="vestBanco('${p.id}')">
         <svg viewBox="-9 -9 18 18" width="26" height="26">${camisaPeca(c, p.numero||'', false)}</svg>
-        <b>${esc((p.nome||'').split(' ').slice(-1)[0])}</b>
+        <b>${esc(nomeCampo(p))}</b>
         <span><i class="pos ${p.pos}">${p.pos}</i> ${p.ovr}</span>
         <span style="color:${corEnergia(p.energia)}">E${Math.round(p.energia)}</span>
       </button>`).join('')||'<p class="empty">Banco vazio.</p>'}</div>
@@ -7668,9 +8284,12 @@ function renderSquad(){
     ${el.map(p=>{
       const tit=t.titulares.indexOf(p.id), banc=t.banco.indexOf(p.id)>=0;
       const en=Math.round(p.energia);
+      const qual = (typeof atributosChave==='function')
+        ? atributosChave(p).slice(0,2).map(([k,v])=>`<i class="q">${ATRIB_NOME[k].slice(0,3).toUpperCase()} ${Math.round(v)}</i>`).join('')
+        : '';
       const sub=ordemElenco==='valor'?`${dinheiro(p.valor)} · ${dinheiro(p.salario)}/mês`
         : ordemElenco==='nota'||ordemElenco==='gols'?`${p.jogos} jogos · ${p.gols}G ${p.assist}A${p.jogos?' · nota '+nota(p).toFixed(1):''}`
-        : `${p.idade} anos · ${p.contrato||0}a de contrato${p.pot>p.ovr+3?' · pot. '+p.pot:''}`;
+        : `${p.idade}a ${qual}${p.pot>p.ovr+3?' · pot. '+p.pot:''}`;
       return `<button class="el-row${typeof craqueCls==='function'?craqueCls(p):''}${p.lesao>0?' les':''}" onclick="fichaJogador('${p.id}')">
         ${camisa(p)}
         <span class="el-info"><b>${esc(nomeLista(p))}${typeof estrelaSelo==='function'?estrelaSelo(p):''}${p.lesao>0?` <i class="el-les" title="lesionado">+${p.lesao}</i>`:''}</b>
@@ -7724,6 +8343,15 @@ function renderTacticsBase(){
   </div>`:''}
 
   ${abaTatica==='ajustes'?`
+  <div class="card"><div class="eyebrow" style="margin-bottom:7px">Treino da semana</div>
+    <div class="seg" style="flex-wrap:wrap">${[['equilibrado','Equilibrado'],['fisico','Físico'],['finalizacao','Finalização'],['tatico','Tático']].map(([k,n])=>
+      `<button aria-pressed="${(L.treino||'equilibrado')===k}" onclick="setTreino('${k}')">${n}</button>`).join('')}</div>
+    <p class="xs mut" style="margin-top:7px">${
+      (L.treino||'equilibrado')==='fisico'?'Recupera energia mais rápido e sobe o físico do elenco.':
+      L.treino==='finalizacao'?'Sobe a finalização (atacantes rendem mais), mas cansa: recupera menos.':
+      L.treino==='tatico'?'Acelera a evolução e sobe passe/marcação conforme a posição.':
+      'Sem ênfase: recuperação normal e evolução normal.'}</p>
+  </div>
   <div class="card"><div class="eyebrow" style="margin-bottom:7px">Mentalidade</div>
     <div class="seg" style="flex-wrap:wrap">${Object.keys(MENT).map(k=>
       `<button aria-pressed="${t.mentalidade===k}" onclick="setTac('mentalidade','${k}')">${MENT[k].n}</button>`).join('')}</div>
@@ -7987,6 +8615,7 @@ function iniciarCarreira(clubId){
   const c=meuClube();
   L.managers[clubId]={id:'eu',nome:'Você'};
   L.diretoria=metaDiretoriaReal(c);
+  if(typeof iniciarCarreiraTecnico==='function') iniciarCarreiraTecnico(clubId);
   garanteTactics(L,clubId);
   L.noticias=[{t:'led',txt:`${c.nome} apresenta o novo treinador para a temporada 2026. A diretoria pede ${ordinal(L.diretoria.meta)} lugar no Brasileirão.`}];
   prepararSlot(L,1);
@@ -8271,17 +8900,29 @@ function novaTemporadaBase(){
   (L.comps.estadual?L.comps.estadual.clubes:[]).forEach(id=>garanteElenco(L,id));
   carregarEuropa(L);
   if(L.diretoria){ const c=meuClube(); L.diretoria=metaDiretoriaReal(c);
-    L.diretoria.meta=clamp(Math.round(minhaPos*0.8),1,17); }
+    // A cobrança aperta depois de um ano bom, mas tem limite: antes ela vinha só
+    // da posição anterior e virava impossível — 16º pedia 13º, depois 10º, e o
+    // técnico de time pequeno era demitido por repetir o que já era bom.
+    const base = L.diretoria.meta;
+    const porResultado = Math.round(minhaPos*0.85);
+    L.diretoria.meta = clamp(Math.max(Math.min(base, porResultado), base-4), 1, 17); }
   const divAgora=(typeof divisaoDe==='function'&&divisaoDe(L.meuClube,L))||'A';
   L.noticias=[{t:'led',txt: divAgora==='B'
     ? `Temporada ${L.temporada} na Série B. A diretoria quer ${ordinal(L.diretoria?L.diretoria.meta:4)} lugar ou melhor — o objetivo é o acesso.`
     : `Temporada ${L.temporada}. A diretoria quer ${ordinal(L.diretoria?L.diretoria.meta:10)} lugar ou melhor no Brasileirão.`}];
   prepararSlot(L,1);
   salvar(true); render(); toast('Nova temporada!');
+  // fez um bom ano? algum clube maior liga agora, antes da bola rolar
+  try{ if(typeof sondagemDeVirada==='function') sondagemDeVirada(minhaPos); }catch(e){}
 }
 
 function renderBase(){
   if(!L){ renderStart(); return; }
+  // sem clube (demitido ou pediu pra sair): a única coisa a fazer é escolher o próximo
+  if((L.demitido || L.semClube) && L.modo!=='amigos' && typeof telaMercadoDeTecnicos==='function'
+     && typeof sheetAberta==='function' && !sheetAberta()){
+    setTimeout(telaMercadoDeTecnicos, 60);
+  }
   if(typeof marcarEstrelas==='function') marcarEstrelas(L);
   renderTop();
   if(TELA==='home'){ L.modo==='amigos'?renderHomeAmigos():renderHome(); }
@@ -8341,11 +8982,15 @@ function depoisDoJogo(){
 }
 
 function fecharSlotBase(L){
+  // temporada já encerrada: não simula nem paga nada de novo, só espera a virada
+  if(L.temporadaFim) return;
   if(typeof aplicarAcoesDaSemana==='function') aplicarAcoesDaSemana(L.slot);
   simularRestoDoSlot(L, L.slot);
   aplicarSemana(L);
   L.slot++;
-  if(L.slot>fimSlot(L)) fecharTemporadaNova(L);
+  // a premiação por posição é paga uma vez só: sem a trava, cada semana a mais
+  // depois do fim do campeonato repetia o prêmio e inflava o caixa
+  if(L.slot>fimSlot(L)){ if(!L.temporadaFim) fecharTemporadaNova(L); }
   else prepararSlot(L, L.slot);
   salvar(true);
 }
@@ -9416,9 +10061,9 @@ function renderTactics(){
       const en=Math.round(p.energia);
       return `<div class="spot ${cls}" data-drop="s${i}" style="left:${x}%;top:${y}%"
         onpointerdown="iniciarArrasto(event,'campo',${i})">
-        <span class="spot-num" style="--k1:${cb.a};--k2:${cb.b}">${typeof camisaPeca==='function'?`<svg viewBox="-9 -9.5 18 18">${camisaPeca(c, numeroDe(p), false)}</svg>`:numeroDe(p)}</span>
+        <span class="spot-num" style="--k1:${cb.a};--k2:${cb.b}">${typeof camisaPeca==='function'?`<svg viewBox="-9 -9.5 18 19">${camisaPeca(c, numeroDe(p), false)}</svg>`:numeroDe(p)}</span>
         <span class="spot-papel ${papel}">${papel}</span>
-        <span class="spot-nome">${esc(p.nome.split(' ').slice(-1)[0])}</span>
+        <span class="spot-nome">${esc(nomeCampo(p))}</span>
         <span class="spot-en"><i style="width:${en}%;background:${en<50?'var(--danger)':en<72?'var(--warn)':'var(--ok)'}"></i></span>
       </div>`;}).join('')}
   </div>
@@ -9453,13 +10098,19 @@ function jogarPartida(){
 
 function tocarFila(lista, aoFim){
   if(FILA_TIMERS.length>120) FILA_TIMERS.splice(0, FILA_TIMERS.length-40);
+  const f=velFator();
   let t=0, segura=0;
   lista.forEach(e=>{
-    const dur=tempoLance(e), tt=Math.min(tempoTexto(e), dur);
+    // nem todo evento vira jogada em campo: os que não viram entram só na narração
+    const anima = (typeof mereceLance!=='function') || mereceLance(e);
+    const dur = anima ? tempoLance(e) : Math.max(160, 380*f);
+    const tt = Math.min(tempoTexto(e)||0, dur);
     const em=t;
-    FILA_TIMERS.push(setTimeout(()=>{ if(M) animarLance(e); }, em));
-    FILA_TIMERS.push(setTimeout(()=>{ if(M){ mostrarEvento(e); desenharMatch(); } }, em+tt));
-    t += dur; segura += tempoSegura(e);
+    FILA_PEND.push(e);                       // ainda não apareceu no placar/narração
+    if(anima) FILA_TIMERS.push(setTimeout(()=>{ if(M) animarLance(e); }, em));
+    FILA_TIMERS.push(setTimeout(()=>{ if(M){ mostrarPendente(e); desenharMatch();
+      if(!anima && typeof bolaOciosa==='function') bolaOciosa(); } }, em+tt));
+    t += dur; segura += anima ? tempoSegura(e) : Math.min(dur, 260*f);
   });
   seguraAte(segura);
   FILA_TIMERS.push(setTimeout(()=>{ if(aoFim) aoFim(); }, Math.max(segura,0)));
@@ -9567,8 +10218,9 @@ function tituloSecao(texto, direita){
 
 function aplicarPele(p){
   const raiz=document.documentElement;
-  if(p==='clara') raiz.removeAttribute('data-pele');
-  else raiz.setAttribute('data-pele','bf');
+  // data-theme vence a preferência do sistema: no PC em modo escuro o tema claro não pegava
+  if(p==='clara'){ raiz.removeAttribute('data-pele'); raiz.setAttribute('data-theme','light'); }
+  else { raiz.setAttribute('data-pele','bf'); raiz.setAttribute('data-theme','dark'); }
   try{ localStorage.setItem('vest_pele', p||'bf'); }catch(e){}
   // o acento do clube precisa ser recalculado para o fundo novo
   try{ if(typeof aplicarTemaClube==='function' && typeof _clubeTema!=='undefined')
@@ -9710,7 +10362,7 @@ function golsLinha(res, side){
   const gs=(res&&res.gs)||[];
   const meus=gs.filter(g=>g[0]===side);
   if(!meus.length) return '';
-  return meus.map(g=>`<span>${esc(g[1].split(' ').slice(-1)[0])} ${g[2]}'</span>`).join('');
+  return meus.map(g=>`<span>${esc(nomeCampo({nome:g[1]}))} ${g[2]}'</span>`).join('');
 }
 
 function quadroRodada(slot, opcoes){
@@ -9882,6 +10534,7 @@ function abrirClube(cid){
 let abaMais = null;
 
 const ITENS_MAIS = [
+  {k:'carreira', n:'Carreira', d:'Sua reputação e passagens'},
   {k:'agenda',   n:'Agenda',   d:'Seus jogos da temporada'},
   {k:'estadio',  n:'Estádio',  d:'Público, renda e obras'},
   {k:'base',     n:'Base',     d:'Garotos para promover'},
@@ -9894,6 +10547,7 @@ const ITENS_MAIS = [
 ];
 
 const ICONE_MAIS = {
+  carreira: '<path d="M4 20v-1.5a4.5 4.5 0 0 1 4.5-4.5h7a4.5 4.5 0 0 1 4.5 4.5V20"/><circle cx="12" cy="7.5" r="3.5"/><path d="M18 3l.8 1.7 1.9.3-1.4 1.3.3 1.9L18 7.3l-1.6.9.3-1.9-1.4-1.3 1.9-.3z" fill="currentColor" stroke="none"/>',
   agenda:   '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><rect x="7" y="13" width="3" height="3" fill="currentColor" stroke="none"/>',
   estadio:  '<path d="M3 11c0-3 4-5 9-5s9 2 9 5v5c0 3-4 5-9 5s-9-2-9-5z"/><path d="M3 11c0 3 4 5 9 5s9-2 9-5"/><path d="M8 6V4M16 6V4M12 5V3"/>',
   base:     '<circle cx="12" cy="8" r="3.2"/><path d="M6 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M17 4l1 2 2 .3-1.5 1.4.4 2-1.9-1-1.9 1 .4-2L14 6.3l2-.3z" fill="currentColor" stroke="none"/>',
@@ -9920,6 +10574,7 @@ function renderMais(){
   const c=meuClube(); if(!c) return;
   const itens = ITENS_MAIS.filter(i=>{
     if(i.k==='tecnicos' && !L.online && L.modo!=='amigos') return false;
+    if(i.k==='carreira' && L.modo==='amigos') return false;   // na liga com amigos o clube é fixo
     return true;
   });
   if(!abaMais){
@@ -9931,7 +10586,7 @@ function renderMais(){
     return;
   }
   const it=ITENS_MAIS.find(i=>i.k===abaMais)||{n:''};
-  const corpo = abaMais==='agenda'?renderAgenda():abaMais==='estadio'?renderEstadio():abaMais==='base'?renderJuniores()
+  const corpo = abaMais==='carreira'?renderCarreira():abaMais==='agenda'?renderAgenda():abaMais==='estadio'?renderEstadio():abaMais==='base'?renderJuniores()
     :abaMais==='tecnicos'?renderTecnicos():abaMais==='historia'?renderHistoria():abaMais==='noticias'?renderNoticias():'';
   $('scr-mais').innerHTML=`
     <div class="mais-cab"><button class="btn sm ghost" onclick="abaMais=null;render()">‹ Mais</button><span class="mais-tit">${iconeMais(abaMais)}${esc(it.n)}</span></div>
@@ -9977,6 +10632,9 @@ function renderAgenda(){
 }
 
 /* ---------- Estádio ---------- */
+
+const LETRA_TREINO = {equilibrado:'e', fisico:'s', finalizacao:'f', tatico:'t'};
+const TREINO_LETRA = {e:'equilibrado', s:'fisico', f:'finalizacao', t:'tatico'};
 
 const OBRA_CUSTO_LUGAR = 6000;     // R$ por lugar
 const OBRA_SEMANAS = 4;
@@ -10062,6 +10720,8 @@ function codAcoes(cid){
   const partes=[];
   if(a.est) partes.push('est~'+a.est);
   (a.base||[]).forEach(i=>partes.push('base~'+i));
+  // o treino da semana viaja junto: cada técnico treina o que escolheu, em todos os aparelhos
+  if(cid===L.meuClube) partes.push('tr~'+(LETRA_TREINO[L.treino||'equilibrado']||'e'));
   return partes.join('.');
 }
 
@@ -10070,6 +10730,7 @@ function lerAcoes(txt){
   String(txt||'').split('.').filter(Boolean).forEach(p=>{ const [k,v]=p.split('~');
     if(k==='est') a.est=parseInt(v,10)||0;
     if(k==='base') a.base.push(parseInt(v,10));
+    if(k==='tr') a.treino=TREINO_LETRA[v] || 'equilibrado';
   });
   return a;
 }
@@ -10077,12 +10738,14 @@ function lerAcoes(txt){
 // aplicada quando a semana fecha, em todos os aparelhos, na mesma ordem
 function aplicarAcoesDaSemana(slot){
   const cids=Object.keys(L.managers||{}).sort();
+  L.clubs.forEach(x=>{ x.treinoSemana='equilibrado'; });
   cids.forEach(cid=>{
     const c=clube(cid); if(!c) return;
     const o=L.ordens && L.ordens[chaveOrdem(cid, slot)];
     let a = o && o.acoes ? o.acoes : null;
     if(!a && cid===L.meuClube && L.acoesPendentes && L.acoesPendentes[cid]) a=L.acoesPendentes[cid];
     if(!a) return;
+    if(a.treino) c.treinoSemana=a.treino;
     if(a.est && !c.obras && a.est>(c.estadio||0)){
       const custo=(a.est-(c.estadio||0))*OBRA_CUSTO_LUGAR;
       if(c.caixa>=custo){ c.caixa-=custo; c.obras={ate:a.est, pronto:slot+OBRA_SEMANAS, custo};
@@ -10227,6 +10890,323 @@ function renderHistoria(){
 function renderNoticias(){
   const ns=L.noticias||[];
   return `<div class="card">${ns.length?ns.map(n=>`<div class="news ${esc(n.t||'')}"><i></i><span class="sm">${esc(n.txt)}</span></div>`).join(''):'<p class="empty">Nada ainda.</p>'}</div>`;
+}
+/* ===== 08-carreira =====
+   A carreira do técnico, não só a do clube. Você tem reputação: ela sobe quando
+   você entrega mais do que a diretoria pediu e quando ganha taça, e cai quando
+   é demitido ou larga um time afundado. A reputação decide quem te liga — e
+   clubes ligam no meio da temporada também, porque é aí que dói escolher. */
+'use strict';
+
+function carreira(){
+  if(!L) return null;
+  if(!L.carreira) L.carreira = {rep:40, passagens:[], sondagem:null, recusadas:{}, semSondagemAte:0};
+  if(!L.carreira.passagens) L.carreira.passagens=[];
+  if(!L.carreira.recusadas) L.carreira.recusadas={};
+  return L.carreira;
+}
+
+// a reputação inicial vem do tamanho do clube que te deu a primeira chance
+function iniciarCarreiraTecnico(cid){
+  const K=carreira(); if(!K) return;
+  const c=clube(cid)||{};
+  K.rep = clamp(Math.round(22 + ((c.niv||70)-62)*1.6), 18, 52);
+  K.passagens = [{cid, de:L.temporada, ate:null, melhorPos:null, titulos:0}];
+}
+
+function passagemAtual(){
+  const K=carreira(); if(!K) return null;
+  let p = K.passagens[K.passagens.length-1];
+  if(!p || p.cid!==L.meuClube || p.ate!==null){
+    p = {cid:L.meuClube, de:L.temporada, ate:null, melhorPos:null, titulos:0};
+    K.passagens.push(p);
+  }
+  return p;
+}
+
+const REP_TITULO = {mundial:20, libertadores:16, brasileir:12, 'copa do brasil':9, 'sul-americana':8, 'série b':7};
+function repDoTitulo(nome){
+  const n=String(nome||'').toLowerCase();
+  for(const k in REP_TITULO) if(n.indexOf(k)>=0) return REP_TITULO[k];
+  return 6;
+}
+
+// chamada quando você ganha uma taça
+function repGanhouTitulo(nomeComp){
+  const K=carreira(); if(!K) return;
+  K.rep = clamp(K.rep + repDoTitulo(nomeComp), 0, 100);
+  const p=passagemAtual(); if(p) p.titulos=(p.titulos||0)+1;
+}
+
+// chamada no fim de cada temporada: entregou mais que a meta, sobe
+function repFimDeTemporada(pos, meta){
+  const K=carreira(); if(!K) return 0;
+  const dif = (meta||12) - (pos||20);            // positivo = melhor que pediram
+  const ganho = dif>=8 ? 14 : dif>=4 ? 9 : dif>=1 ? 5 : dif===0 ? 2 : dif>=-3 ? -4 : -9;
+  K.rep = clamp(K.rep + ganho, 0, 100);
+  const p=passagemAtual();
+  if(p && (p.melhorPos===null || pos<p.melhorPos)) p.melhorPos=pos;
+  return ganho;
+}
+
+function repDemitido(){ const K=carreira(); if(K) K.rep=clamp(K.rep-14,0,100); fecharPassagem(); }
+function fecharPassagem(){
+  const K=carreira(); if(!K) return;
+  const p=K.passagens[K.passagens.length-1];
+  if(p && p.ate===null) p.ate=L.temporada;
+}
+
+function nivelRep(r){
+  return r>=85?'Ídolo' : r>=70?'Badalado' : r>=55?'Respeitado' : r>=38?'Conhecido' : r>=22?'Iniciante' : 'Queimado';
+}
+
+/* ---------- quem te quer ---------- */
+
+// o teto de clube que a sua reputação alcança
+function tetoDeClube(rep){ return 60 + rep*0.22; }        // rep 40 → 68.8 · rep 90 → 79.8
+
+// clubes brasileiros (A e B) que contratariam você agora
+function clubesInteressados(n, excluir){
+  const K=carreira(); if(!K) return [];
+  const teto = tetoDeClube(K.rep);
+  const naLiga = (typeof divisoes==='function') ? divisoes(L).A.concat(divisoes(L).B) : null;
+  const tb = (typeof tabela==='function') ? tabela(L) : [];
+  const r = rng((L.seed||'x')+'#chama'+L.temporada+'_'+L.slot+'_'+Math.round(K.rep));
+  const lista = L.clubs.filter(c=>{
+    if(typeof ehEuropeu==='function' && ehEuropeu(c.id)) return false;
+    if(c.id===excluir || c.id===L.meuClube) return false;
+    if(naLiga && naLiga.indexOf(c.id)<0) return false;
+    if((K.recusadas||{})[c.id] > L.temporada) return false;      // recusou, o clube some por um tempo
+    return (c.niv||70) <= teto + 1.5;
+  }).map(c=>{
+    const i=tb.findIndex(x=>x.id===c.id);
+    return {c, pos:i>=0?i+1:null, perto: -Math.abs((c.niv||70) - teto)};
+  }).sort((a,b)=>b.perto-a.perto);
+  const perto = lista.slice(0, Math.max(n*3, 8));
+  const out=[];
+  while(out.length<n && perto.length) out.push(perto.splice(Math.floor(r()*perto.length),1)[0]);
+  return out;
+}
+
+/* ---------- sondagem no meio da temporada ---------- */
+
+// só sonda quem está indo bem, e só um clube maior que o seu
+function sondagemDaSemana(){
+  const K=carreira();
+  if(!K || !L || L.modo==='amigos' || L.demitido || L.semClube || L.temporadaFim) return;
+  if(!L.diretoria) return;
+  if(L.slot < 8 || L.slot > 34) return;                     // nem no começo nem na última reta
+  if(K.sondagem) return;                                    // uma de cada vez
+  if(L.slot < (K.semSondagemAte||0)) return;
+  const meu = meuClube(); if(!meu) return;
+  const tb = tabela(L), pos = tb.findIndex(x=>x.id===L.meuClube)+1;
+  if(!pos) return;
+  // indo bem = melhor que a meta, ou com taça no currículo
+  const indoBem = pos <= Math.max(2, (L.diretoria.meta||12) - 2);
+  if(!indoBem && K.rep < 62) return;
+  const r = rng((L.seed||'x')+'#sonda'+L.temporada+'_'+L.slot);
+  const chance = 0.07 + (K.rep-40)/380 + (indoBem?0.05:0);
+  if(r() > clamp(chance, 0.03, 0.22)) return;
+  // o clube que liga tem que ser melhor que o seu, senão não é tentação
+  const alvos = clubesInteressados(6).filter(o => (o.c.niv||70) > (meu.niv||70) + 1.5);
+  if(!alvos.length) return;
+  const o = alvos[Math.floor(r()*alvos.length)];
+  K.sondagem = {cid:o.c.id, slot:L.slot, temporada:L.temporada, meio:true};
+  L.noticias.unshift({t:'led', txt:`O ${o.c.nome} procurou você. A diretoria deles quer conversar.`});
+  if(typeof enfileirar==='function') enfileirar(telaSondagem);
+  else telaSondagem();
+}
+
+/* Na virada da temporada as propostas são mais firmes: quem fez um bom ano
+   recebe convite de clube maior, e aí decide se fica no projeto ou sobe de degrau. */
+function sondagemDeVirada(posAnterior){
+  const K=carreira();
+  if(!K || !L || L.modo==='amigos' || L.demitido || L.semClube) return;
+  const meu=meuClube(); if(!meu) return;
+  const meta = L.diretoria ? L.diretoria.meta : 12;
+  const fezBonito = (posAnterior && posAnterior <= meta) || K.rep >= 58;
+  if(!fezBonito) return;
+  const r = rng((L.seed||'x')+'#virada'+L.temporada+'_'+Math.round(K.rep));
+  const chance = clamp(0.16 + (K.rep-45)/240 + (posAnterior&&posAnterior<=3?0.14:0), 0.08, 0.55);
+  if(r() > chance) return;
+  const alvos = clubesInteressados(6).filter(o => (o.c.niv||70) > (meu.niv||70) + 1);
+  if(!alvos.length) return;
+  const o = alvos[Math.floor(r()*alvos.length)];
+  K.sondagem = {cid:o.c.id, slot:1, temporada:L.temporada, meio:false};
+  L.noticias.unshift({t:'led', txt:`O ${o.c.nome} quer você para ${L.temporada}.`});
+  if(typeof enfileirar==='function') enfileirar(telaSondagem); else telaSondagem();
+}
+
+function telaSondagem(){
+  const K=carreira(); if(!K || !K.sondagem) return;
+  const c=clube(K.sondagem.cid); if(!c){ K.sondagem=null; return; }
+  const meu=meuClube();
+  const meta = (typeof metaDiretoriaReal==='function') ? metaDiretoriaReal(c).meta : 10;
+  const tb=tabela(L); const posDeles=tb.findIndex(x=>x.id===c.id)+1;
+  const posMinha=tb.findIndex(x=>x.id===L.meuClube)+1;
+  const meio = K.sondagem.meio;
+  sheet('Proposta de trabalho', `
+    <div class="row" style="gap:10px;align-items:center;margin-bottom:10px">
+      ${typeof crestHTML==='function'?crestHTML(c,42):escudoSVG(c,42)}
+      <div><b style="font-size:18px">${esc(c.nome)}</b>
+        <div class="xs mut">${esc(c.cidade||'')} · Série ${(typeof divisaoDe==='function'&&divisaoDe(c.id,L))||'A'}${posDeles?' · '+ordinal(posDeles)+'º':''} · elenco nível ${c.niv}</div></div>
+    </div>
+    <p class="sm" style="margin-bottom:10px">${meio
+      ? `O ${esc(c.nome)} quer você <b>agora</b>, no meio da temporada. Se aceitar, larga o ${esc(meu.nome)} ${posMinha?'em '+ordinal(posMinha)+'º':''} e assume o novo clube na semana que vem — a temporada continua correndo.`
+      : `O ${esc(c.nome)} quer você para a próxima temporada.`}</p>
+    <div class="card flat" style="margin-bottom:12px">
+      <div class="between sm"><span class="mut">Eles pedem</span><span><b>${ordinal(meta)} lugar</b></span></div>
+      <div class="between sm"><span class="mut">Hoje você está no</span><span>${esc(meu.nome)} · nível ${meu.niv}</span></div>
+      <div class="between sm"><span class="mut">Sua reputação</span><span><b>${nivelRep(K.rep)}</b> · ${Math.round(K.rep)}</span></div>
+    </div>
+    <div class="stack">
+      <button class="btn pri wide" onclick="aceitarSondagem()">Aceitar e assumir o ${esc(c.sigla||c.nome)}</button>
+      <button class="btn ghost wide" onclick="recusarSondagem()">Recusar · fico onde estou</button>
+    </div>
+    <p class="xs mut" style="margin-top:10px">Recusar não te queima: a diretoria daqui gosta de quem fica. Mas esse clube só volta a te procurar na próxima temporada.</p>`);
+}
+
+function aceitarSondagem(){
+  const K=carreira(); if(!K||!K.sondagem) return;
+  const cid=K.sondagem.cid; K.sondagem=null;
+  const antigo=meuClube();
+  fecharPassagem();
+  L.noticias.unshift({t:'led', txt:`Você deixou o ${antigo.nome} para assumir o ${clube(cid).nome}.`});
+  trocarDeClube(cid, true);
+}
+
+function recusarSondagem(){
+  const K=carreira(); if(!K||!K.sondagem) return;
+  const c=clube(K.sondagem.cid);
+  K.recusadas[K.sondagem.cid] = L.temporada;      // volta a poder ligar só depois desta temporada
+  K.sondagem=null;
+  K.semSondagemAte = L.slot + 8;
+  if(L.diretoria) L.diretoria.paciencia = clamp(L.diretoria.paciencia+6, 0, 100);
+  if(c) L.noticias.unshift({t:'', txt:`Você recusou o ${c.nome} e renovou o compromisso com a torcida.`});
+  fecharSheet(); salvar(true); render();
+  if(typeof toast==='function') toast('Proposta recusada.');
+}
+
+/* ---------- pedir demissão ---------- */
+
+function pedirDemissao(){
+  const c=meuClube(); if(!c) return;
+  const tb=tabela(L), pos=tb.findIndex(x=>x.id===L.meuClube)+1;
+  const meta=L.diretoria?L.diretoria.meta:12;
+  const feio = pos && pos > meta+3;
+  sheet('Deixar o clube', `
+    <p class="sm" style="margin-bottom:10px">Você vai pedir demissão do <b>${esc(c.nome)}</b>${pos?`, hoje em ${ordinal(pos)} lugar`:''}. Fica sem clube e escolhe entre os times que te procurarem.</p>
+    <div class="card flat" style="margin-bottom:12px">
+      <div class="between sm"><span class="mut">Sua reputação</span><span><b>${nivelRep(carreira().rep)}</b> · ${Math.round(carreira().rep)}</span></div>
+      <div class="between sm"><span class="mut">Depois de sair</span><span style="color:${feio?'var(--danger)':'var(--ok)'}">${feio?'cai '+6+' pontos':'sem perda'}</span></div>
+    </div>
+    ${feio?`<p class="xs mut" style="margin-bottom:12px">Largar o time em ${ordinal(pos)} lugar pega mal no mercado: os clubes que ligam depois são menores.</p>`
+          :`<p class="xs mut" style="margin-bottom:12px">Saindo com o time bem colocado, ninguém estranha. Sua reputação fica intacta.</p>`}
+    <div class="stack">
+      <button class="btn wide" style="background:var(--danger);color:#fff" onclick="confirmarDemissao(${feio?1:0})">Confirmar e sair</button>
+      <button class="btn ghost wide" onclick="fecharSheet()">Deixa pra lá</button>
+    </div>`);
+}
+
+function confirmarDemissao(feio){
+  const K=carreira(); if(!K) return;
+  const c=meuClube();
+  if(feio) K.rep = clamp(K.rep-6, 0, 100);
+  fecharPassagem();
+  L.semClube = {de:L.meuClube, temporada:L.temporada, slot:L.slot, pediu:true};
+  L.noticias.unshift({t:'bad', txt:`Você pediu demissão do ${c.nome}.`});
+  fecharSheet(); salvar(true);
+  telaMercadoDeTecnicos();
+}
+
+/* ---------- a tela de quem te chama (demitido ou por conta própria) ---------- */
+
+function telaMercadoDeTecnicos(){
+  const K=carreira(); if(!K) return;
+  const saiuDe = (L.semClube&&L.semClube.de) || (L.demitido&&L.demitido.de) || null;
+  const pediu = !!(L.semClube && L.semClube.pediu);
+  const ofertas = clubesInteressados(3, saiuDe);
+  const antigo = saiuDe?clube(saiuDe):null;
+  sheet(pediu?'Sem clube':'Você foi demitido', `
+    <p class="sm" style="margin-bottom:6px">${pediu
+      ? `Você saiu do <b>${esc(antigo?antigo.nome:'clube')}</b> por vontade própria.`
+      : `O <b>${esc(antigo?antigo.nome:'clube')}</b> encerrou seu ciclo${L.demitido&&L.demitido.pos?` — ${ordinal(L.demitido.pos)} lugar`:''}.`}</p>
+    <div class="card flat" style="margin-bottom:10px">
+      <div class="between sm"><span class="mut">Sua reputação</span><span><b>${nivelRep(K.rep)}</b> · ${Math.round(K.rep)}</span></div>
+      <div class="between sm"><span class="mut">Taças na carreira</span><span>${(L.titulos||[]).length}</span></div>
+    </div>
+    <p class="xs mut" style="margin-bottom:10px">${ofertas.length?'Quem ligou:':'Ninguém ligou ainda.'}</p>
+    <div class="stack" style="margin-bottom:12px">
+      ${ofertas.map(o=>`<button class="plr" onclick="assumirNovoClube('${o.c.id}')">
+        ${typeof crestHTML==='function'?crestHTML(o.c,26):escudoSVG(o.c,26)}
+        <span class="plr-n"><b>${esc(o.c.nome)}</b>
+          <span>${esc(o.c.cidade||'')} · Série ${(typeof divisaoDe==='function'&&divisaoDe(o.c.id,L))||'A'}${o.pos?' · '+ordinal(o.pos)+'º na tabela':''} · elenco nível ${o.c.niv}</span></span>
+        <span class="pill">Assumir</span></button>`).join('')}
+    </div>
+    <hr class="chalk" style="margin:12px 0">
+    <button class="btn ghost wide" onclick="recomecarDoZero()">Apagar tudo e começar outra carreira</button>`);
+}
+
+// muda de clube mantendo a carreira (usado pela sondagem e pela recolocação)
+function trocarDeClube(cid, meioDaTemporada){
+  const c=clube(cid); if(!c) return;
+  const K=carreira();
+  L.meuClube = cid;
+  L.demitido = null; L.semClube = null;
+  L.propostas = [];
+  L.diretoria = (typeof metaDiretoriaReal==='function') ? metaDiretoriaReal(c) : {meta:12, paciencia:100, avisos:0};
+  L.diretoria.paciencia = 100; L.diretoria.avisos = 0;
+  if(K){ K.sondagem=null; K.semSondagemAte = L.slot + 10; }
+  passagemAtual();
+  garanteElenco(L, cid); if(typeof garanteTactics==='function') garanteTactics(L, cid);
+  if(typeof aplicarTemaClube==='function') aplicarTemaClube(c);
+  L.noticias.unshift({t:'led',
+    txt:`Você é o novo técnico do ${c.nome}. A diretoria quer ${ordinal(L.diretoria.meta)} lugar.`});
+  fecharSheet(); salvar(true);
+  if(!meioDaTemporada && L.temporadaFim && typeof novaTemporadaBase==='function'){
+    try{ novaTemporadaBase(); }catch(e){}
+    fecharSheet();
+  }
+  render(); irPara('home');
+  if(typeof toast==='function') toast('Bem-vindo ao '+c.nome+'.');
+}
+
+/* ---------- a tela da carreira ---------- */
+
+function renderCarreira(){
+  const K=carreira(); if(!K) return '';
+  const pct=Math.round(K.rep);
+  const tit=(L.titulos||[]);
+  const porComp={};
+  tit.forEach(t=>{ porComp[t.comp]=(porComp[t.comp]||0)+1; });
+  return `
+  <div class="card" style="margin-bottom:12px">
+    <div class="eyebrow">Reputação</div>
+    <div class="row" style="align-items:baseline;gap:8px;margin:4px 0 8px">
+      <b style="font-size:26px">${nivelRep(K.rep)}</b><span class="mono mut">${pct}/100</span>
+    </div>
+    <div class="atr-b" style="height:9px"><i style="width:${pct}%;background:${pct>=70?'var(--ok)':pct>=40?'var(--warn)':'var(--danger)'}"></i></div>
+    <p class="xs mut" style="margin-top:8px">Sobe quando você entrega mais do que a diretoria pede e quando levanta taça. Cai se for demitido ou largar um time afundado. É ela que decide o tamanho do clube que te liga.</p>
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="eyebrow">Taças</div>
+    ${tit.length?`<div class="stack" style="margin-top:6px">${Object.keys(porComp).map(k=>
+      `<div class="between sm"><span>${esc(k)}</span><b>${porComp[k]}×</b></div>`).join('')}</div>`
+      :'<p class="empty" style="margin:6px 0 0">Nenhuma ainda.</p>'}
+  </div>
+  <div class="card" style="margin-bottom:12px">
+    <div class="eyebrow">Onde você passou</div>
+    <div class="stack" style="margin-top:6px">
+      ${K.passagens.slice().reverse().map(p=>{ const c=clube(p.cid)||{nome:p.cid};
+        return `<div class="plr">${typeof crestHTML==='function'?crestHTML(c,24):''}
+          <span class="plr-n"><b>${esc(c.nome)}</b>
+            <span>${p.de}${p.ate&&p.ate!==p.de?'–'+p.ate:p.ate?'':' · atual'}${p.melhorPos?' · melhor '+ordinal(p.melhorPos)+'º':''}${p.titulos?' · '+p.titulos+' taça'+(p.titulos>1?'s':''):''}</span></span>
+        </div>`; }).join('')}
+    </div>
+  </div>
+  ${(L.modo!=='amigos' && !L.demitido && !L.semClube) ? `
+  <button class="btn ghost wide" onclick="pedirDemissao()">Pedir demissão do ${esc((meuClube()||{}).sigla||'clube')}</button>
+  <p class="xs mut" style="text-align:center;margin-top:8px">Sai do clube quando quiser e escolhe entre quem te procurar.</p>` : ''}`;
 }
 /* ===== 08-online =====
    Liga online de verdade: Firebase Realtime Database + login anônimo.
